@@ -1,6 +1,6 @@
 VERSION 0.8
-WORKDIR /workdir
 FROM golang:1.24.7
+WORKDIR /workdir
 
 build:
    COPY .* .
