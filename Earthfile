@@ -1,9 +1,8 @@
 VERSION 0.8
-FROM golang:1.24.7
+FROM golang:1.25.1
 WORKDIR /workdir
-
 build:
-   COPY .* .
+   COPY . .
    ENV GOOS=linux
    ENV GOARCH=amd64
    RUN go build -o kairos-re-unlock .
