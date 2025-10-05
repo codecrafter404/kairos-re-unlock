@@ -1,0 +1,16 @@
+services:
+  qemu:
+    image: qemux/qemu
+    container_name: qemu
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/kvm
+      - /dev/net/tun
+    ports:
+      - 8006:8006
+    volumes:
+      - ./qemu:/storage
+      - ./build/image.iso:/boot.iso
+    restart: always
+    stop_grace_period: 2m

@@ -2,12 +2,12 @@ module github.com/codecrafter404/kairos-re-unlock
 
 go 1.25.1
 
-require github.com/jaypipes/ghw v0.19.1
-
 require (
-	github.com/chuckpreslar/emission v0.0.0-20170206194824-a7ddd980baf9 // indirect
-	github.com/mudler/go-pluggable v0.0.0-20230126220627-7710299a0ae5 // indirect
+	github.com/jaypipes/ghw v0.19.1
+	github.com/mudler/go-pluggable v0.0.0-20230126220627-7710299a0ae5
 )
+
+require github.com/chuckpreslar/emission v0.0.0-20170206194824-a7ddd980baf9 // indirect
 
 require (
 	github.com/go-ole/go-ole v1.2.6 // indirect
