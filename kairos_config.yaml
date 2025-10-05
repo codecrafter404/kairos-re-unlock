@@ -9,3 +9,5 @@ users:
   passwd: kairos
   groups:
   - admin
+k3s:
+  enabled: true
