@@ -4,7 +4,8 @@ FROM golang:1.24.7
 
 build:
    COPY .* .
-   ENV GOOS=linux GOARCH=amd64
+   ENV GOOS=linux
+   ENV GOARCH=amd64
    RUN go build -o kairos-re-unlock .
    SAVE ARTIFACT kairos-re-unlock
 image:
