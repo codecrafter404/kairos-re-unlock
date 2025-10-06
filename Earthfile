@@ -12,12 +12,8 @@ image:
    COPY +build/kairos-re-unlock /system/discovery/kcrypt-re-unlock
    RUN rm -f /system/discovery/kcrypt-discovery-challenger
    SAVE IMAGE kairos-re-unlock:latest AS LOCAL kairos-re-unlock:latest
-up:
-   BUILD +build
-   BUILD +image
-   HOST docker compose up aurora-boot
-   HOST mv ./build/*.iso ./build/boot.iso
-   HOST docker compose up -d qemu
-down:
-   HOST docker compose down -v
-   HOST rm -rf ./build
+iso:
+   WITH DOCKER --load=kcrypt-re-unclock:latest=+image --compose docker-compose.yaml --service aurora-boot
+      RUN mv ./build/*.iso ./build/boot.iso
+   END
+   SAVE ARTIFACT build/boot.iso AS LOCAL ./build/boot.iso
