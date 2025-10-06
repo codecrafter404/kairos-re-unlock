@@ -12,19 +12,12 @@ image:
    COPY +build/kairos-re-unlock /system/discovery/kcrypt-re-unlock
    RUN rm -f /system/discovery/kcrypt-discovery-challenger
    SAVE IMAGE kairos-re-unlock:latest AS LOCAL kairos-re-unlock:latest
-build-iso:
-   FROM earthly/dind:alpine-3.19-docker-25.0.5-r0
-   COPY ./kairos_config.yaml config.yaml
-   WITH DOCKER --load image:latest=+image
-      RUN docker run -v ./config.yaml:/config.yaml \
-             -v ./build:/tmp/auroraboot \
-             -v /var/run/docker.sock:/var/run/docker.sock \
-             --rm -ti quay.io/kairos/auroraboot \
-             --set container_image=docker://image \
-             --set "disable_http_server=true" \
-             --set "disable_netboot=true" \
-             --cloud-config /config.yaml \
-             --set "state_dir=/tmp/auroraboot"
-   END
-   RUN mv build/*.iso build/image.iso
-   SAVE ARTIFACT build/image.iso AS LOCAL build/image.iso
+up:
+   BUILD +build
+   BUILD +image
+   HOST docker compose up aurora-boot
+   HOST mv ./build/*.iso ./build/boot.iso
+   HOST docker compose up -d qemu
+down:
+   HOST docker compose down -v
+   HOST rm -rf ./build
