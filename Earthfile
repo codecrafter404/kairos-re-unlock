@@ -5,6 +5,7 @@ build:
    COPY . .
    ENV GOOS=linux
    ENV GOARCH=amd64
+   RUN go mod download
    RUN go build -o kairos-re-unlock .
    SAVE ARTIFACT kairos-re-unlock
 image:
@@ -13,7 +14,10 @@ image:
    RUN rm -f /system/discovery/kcrypt-discovery-challenger
    SAVE IMAGE kairos-re-unlock:latest AS LOCAL kairos-re-unlock:latest
 iso:
-   WITH DOCKER --load=kcrypt-re-unclock:latest=+image --compose docker-compose.yaml --service aurora-boot
-      RUN mv ./build/*.iso ./build/boot.iso
+   FROM earthly/dind:alpine-3.19-docker-25.0.5-r0
+   COPY docker-compose.yaml .
+   COPY kairos_config.yaml .
+   WITH DOCKER --load=kairos-re-unlock:latest=+image --compose docker-compose.yaml --service aurora-boot
+      RUN echo Waiting for image to build;while [ ! -e ./build/*.iso ]; do sleep 1; done; mv ./build/*.iso ./build/boot.iso
    END
    SAVE ARTIFACT build/boot.iso AS LOCAL ./build/boot.iso

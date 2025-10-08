@@ -11,7 +11,7 @@ services:
       - 8006:8006
     volumes:
       - ./qemu:/storage
-      - ./build/*.iso:/boot.iso
+      - ./build/boot.iso:/boot.iso
     restart: always
     stop_grace_period: 2m
   aurora-boot:
@@ -20,6 +20,6 @@ services:
     volumes:
       - ./build:/tmp/auroraboot
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./kairos_config.yaml:/config.yaml
-    command: ['--set container_image=docker://kairos-re-unlock:latest', '--set "disable_http_server=true"', '--set "disable_netboot=true"', '--cloud-config /config.yaml', '--set "state_dir=/tmp/auroraboo']
+      - ${PWD}/kairos_config.yaml:/config.yaml
+    command: ['--debug','--set', 'container_image=docker://kairos-re-unlock', '--set', 'disable_http_server=true', '--set', 'disable_netboot=true', '--cloud-config', '/config.yaml', '--set', 'state_dir=/tmp/auroraboot']
     
