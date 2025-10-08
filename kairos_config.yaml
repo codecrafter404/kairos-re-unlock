@@ -1,6 +1,9 @@
 install:
   encrypted_partitions:
   - COS_PERSISTENT
+  auto: true
+  restart: true
+  device: "/dev/sda"
 
 hostname: metal-{{ trunc 4 .MachineID }}
 users:
