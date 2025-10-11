@@ -8,7 +8,6 @@ install:
 hostname: metal-{{ trunc 4 .MachineID }}
 users:
 - name: kairos
-  # Change to your pass here
   passwd: kairos
   groups:
   - admin

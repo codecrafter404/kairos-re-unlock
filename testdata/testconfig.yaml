@@ -1,0 +1,45 @@
+#cloud-config
+
+# for test purposes lies in /tmp/oem/00_cloudconfig.yaml
+kcrypt:
+  remote_unlock:
+    edgevpn_token: b3RwOgogIGRodDoKICAgIGludGVydmFsOiA5MjIzMzcyMDM2ODU0Nzc1ODA3CiAgICBrZXk6IFMxc0tjWmU2OU1pcDA1TlhOZ3Zmd2NYMXFVdHY5SThJMHYwVk9oVUZrUXcKICAgIGxlbmd0aDogNDMKICBjcnlwdG86CiAgICBpbnRlcnZhbDogOTIyMzM3MjAzNjg1NDc3NTgwNwogICAga2V5OiAxY0pTZjdESENvMXJVb1NPS3RMT3RGUmNtWk81bElZQndyYmpCQU1ocFNjCiAgICBsZW5ndGg6IDQzCnJvb206IHNVbGpNVDVHcjltVk5uWVBsTDhZT0Vob3FabjBPU1VhOEVFQ0VlTWQ0eVcKcmVuZGV6dm91czogTWkwY2RIREUwa0NWWU5hNzVrWVd6M2JabEtKYkVOUTBLc0RZeTNINWR5dgptZG5zOiA2ck1mR1pobjZsQ3p1Mk9NNnlYZjZtckNFbE5SNWtlcGtENWZKWVY2UHlWCm1heF9tZXNzYWdlX3NpemU6IDIwOTcxNTIwCg==
+    public_key: |
+      -----BEGIN PUBLIC KEY-----
+      MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA09lno0NQcQQtcXpS3FXK
+      YteUTg2l7C8owtSTY1fOESrcUsuHYDG7PGj5LutezD5NwZP6K/2rZW2LltW7avV9
+      zBqVT3+bxklRpGOzsFUeXETdgU5EjOKUQlSYEDpcjlGDPdaF0Z1DfxDI3fH8GKpN
+      vwdcV8XbjlPrBRMYf+G6rWuvx4cepp6pujwP5/h5v9Dd5yL6wCQ7yAjf77g0tqxJ
+      66vqroqQFGk1yaA7UsKklWecZ1rC6uTRxntkaN4dTNDRIY892FPqXPuwmyXCWRMG
+      G26yAN+bYlfjXjFU/uUhw3zCVq6LBUs70HwMiLDBjBuhPznCJW9jUWNR3ZfdbfuF
+      ywIDAQAB
+      -----END PUBLIC KEY-----
+    private_key: |
+      -----BEGIN PRIVATE KEY-----
+      MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDT2WejQ1BxBC1x
+      elLcVcpi15RODaXsLyjC1JNjV84RKtxSy4dgMbs8aPku617MPk3Bk/or/atlbYuW
+      1btq9X3MGpVPf5vGSVGkY7OwVR5cRN2BTkSM4pRCVJgQOlyOUYM91oXRnUN/EMjd
+      8fwYqk2/B1xXxduOU+sFExh/4bqta6/Hhx6mnqm6PA/n+Hm/0N3nIvrAJDvICN/v
+      uDS2rEnrq+quipAUaTXJoDtSwqSVZ5xnWsLq5NHGe2Ro3h1M0NEhjz3YU+pc+7Cb
+      JcJZEwYbbrIA35tiV+NeMVT+5SHDfMJWrosFSzvQfAyIsMGMG6E/OcIlb2NRY1Hd
+      l91t+4XLAgMBAAECggEATa3NbRVtJQuZmB74zBbe/3A5zob9nIVMRmhI5OfYxP24
+      zNkZOgHyPDvnhrdCStTbkQvv8vpwQuAwi22ya405g8IJlp1dYo8W0xbF1/XWDJIp
+      wFSRGTGpmErJeUXVE1A7Ncz3w30NN0XRyWQGAotLt6x8xShlEaKerf0rAhUkbJrB
+      jqpGaU2LJC3TWURUst0rk2nAGhuOgIRbpOXuAsmXkMSwd7yBqby//AL3yI1CPu9T
+      XQXk2Pa97YIGz67cGz1lyyiePm33jTDufca+vawizPgdHzhmLMpCdJKTqvrGASUf
+      6TDzlOjshawzvAGlvHXPjk11zopmN/ElwptUBHKwMQKBgQDq9VAFRTkFAucvQkBY
+      15ieiyC8tzcHiaZ32UTQJKeBy69zGzsObAWZ4eE3npA9beHVL1p5DmiGrAzitN6T
+      d3lfHrxJ2K7VSkT5JqKGNSelLo+w8aT4kQp+9LuNtvAGCOf/3oN6kPPMeoAMNFcD
+      td6Of2jc2AFbZGEKfefB2D8QsQKBgQDm0kqlld/1OYuLM/PcaoOij3nS0sOurecg
+      et8mdHtWLjoKJxHaQdqJxVZJJsP4Lb5EwGKTXo8r/6/+TMR+5ZkkkUiv7LOLTMHq
+      m/bHUEventPDnS/kuJ1IYqcCYlBc+YuHMoZdL2I/oVDKX9+IFzeBvjZogEUI80DI
+      rGUTkiC9OwKBgQDVsA36/R4CpMVFgeer5Uj0yGwZtjfiLxqrXXrsIqoFrg3/jgCD
+      +VKOxZRjVV6xv8HodYy/FI+UC94cQYs8ayiDjhyIvP0lFsrsHmspzCYmYNZmgx8a
+      wi7dkA8TsBFUK710RBcn3bUdfzv93YxV345t4wqn7/wr9nsbY67n6ZhRwQKBgQC3
+      Mmqal6SD7iNJ3XcMFuHZMMTAxhUXW+DYT40y6TpGwTPBgRbTQncf56a/MmxRWoTr
+      7kGOs3swsaPOUsGV8calVkX5kwVBZy91dEneEWXWD/sFA4nSn4/9tobVBpC/6jOK
+      n1gzN3tkAzWrGYLBcaPVbtGiCURBgUeGvgUPDmi7pwKBgQDAjIcN2g5J5SNzOAlH
+      a8qmVUfpPlOfG7k7wimcsmNCXAeztmR68hv6hdUVCU6UgO2vvVHAmTc5GaR34txu
+      Y2olpz9daEuOZ4ztca8Ga8S/GeQ5NnALgpnukZohU5at8K8fLudF9aF+62AJQUDE
+      bERKdV+OHpQwNos76HLIDVsCkg==
+      -----END PRIVATE KEY-----
