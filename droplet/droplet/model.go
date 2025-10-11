@@ -58,7 +58,7 @@ func (r ReceivedPayload) DecryptPassword(privateKey string) (string, error) {
 		return "", fmt.Errorf("Key is not a private key")
 	}
 
-	privKeyAny, err := x509.ParsePKIXPublicKey(privateBlock.Bytes)
+	privKeyAny, err := x509.ParsePKCS8PrivateKey(privateBlock.Bytes)
 	if err != nil {
 		return "", fmt.Errorf("Failed to parse private key block: %w", err)
 	}
