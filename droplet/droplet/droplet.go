@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/codecrafter404/go-nodepair"
+	"github.com/codecrafter404/kairos-re-unlock/common"
 	"github.com/kairos-io/kcrypt/pkg/bus"
 	"github.com/mudler/go-pluggable"
 	"github.com/rs/zerolog/log"
@@ -41,7 +42,7 @@ func Start(config Config) error {
 func getResponse(config Config) (string, error) {
 	// edgevpn get payload
 	ctx, _ := context.WithCancel(context.Background())
-	payload := &ReceivedPayload{}
+	payload := &common.Payload{}
 
 	err := nodepair.Receive(ctx, payload, nodepair.WithToken(config.EdgeVPNToken))
 

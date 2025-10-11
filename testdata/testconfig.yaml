@@ -1,45 +1,43 @@
-#cloud-config
-
-# for test purposes lies in /tmp/oem/00_cloudconfig.yaml
 kcrypt:
-  remote_unlock:
-    edgevpn_token: b3RwOgogIGRodDoKICAgIGludGVydmFsOiA5MjIzMzcyMDM2ODU0Nzc1ODA3CiAgICBrZXk6IFMxc0tjWmU2OU1pcDA1TlhOZ3Zmd2NYMXFVdHY5SThJMHYwVk9oVUZrUXcKICAgIGxlbmd0aDogNDMKICBjcnlwdG86CiAgICBpbnRlcnZhbDogOTIyMzM3MjAzNjg1NDc3NTgwNwogICAga2V5OiAxY0pTZjdESENvMXJVb1NPS3RMT3RGUmNtWk81bElZQndyYmpCQU1ocFNjCiAgICBsZW5ndGg6IDQzCnJvb206IHNVbGpNVDVHcjltVk5uWVBsTDhZT0Vob3FabjBPU1VhOEVFQ0VlTWQ0eVcKcmVuZGV6dm91czogTWkwY2RIREUwa0NWWU5hNzVrWVd6M2JabEtKYkVOUTBLc0RZeTNINWR5dgptZG5zOiA2ck1mR1pobjZsQ3p1Mk9NNnlYZjZtckNFbE5SNWtlcGtENWZKWVY2UHlWCm1heF9tZXNzYWdlX3NpemU6IDIwOTcxNTIwCg==
-    public_key: |
-      -----BEGIN PUBLIC KEY-----
-      MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA09lno0NQcQQtcXpS3FXK
-      YteUTg2l7C8owtSTY1fOESrcUsuHYDG7PGj5LutezD5NwZP6K/2rZW2LltW7avV9
-      zBqVT3+bxklRpGOzsFUeXETdgU5EjOKUQlSYEDpcjlGDPdaF0Z1DfxDI3fH8GKpN
-      vwdcV8XbjlPrBRMYf+G6rWuvx4cepp6pujwP5/h5v9Dd5yL6wCQ7yAjf77g0tqxJ
-      66vqroqQFGk1yaA7UsKklWecZ1rC6uTRxntkaN4dTNDRIY892FPqXPuwmyXCWRMG
-      G26yAN+bYlfjXjFU/uUhw3zCVq6LBUs70HwMiLDBjBuhPznCJW9jUWNR3ZfdbfuF
-      ywIDAQAB
-      -----END PUBLIC KEY-----
-    private_key: |
-      -----BEGIN PRIVATE KEY-----
-      MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDT2WejQ1BxBC1x
-      elLcVcpi15RODaXsLyjC1JNjV84RKtxSy4dgMbs8aPku617MPk3Bk/or/atlbYuW
-      1btq9X3MGpVPf5vGSVGkY7OwVR5cRN2BTkSM4pRCVJgQOlyOUYM91oXRnUN/EMjd
-      8fwYqk2/B1xXxduOU+sFExh/4bqta6/Hhx6mnqm6PA/n+Hm/0N3nIvrAJDvICN/v
-      uDS2rEnrq+quipAUaTXJoDtSwqSVZ5xnWsLq5NHGe2Ro3h1M0NEhjz3YU+pc+7Cb
-      JcJZEwYbbrIA35tiV+NeMVT+5SHDfMJWrosFSzvQfAyIsMGMG6E/OcIlb2NRY1Hd
-      l91t+4XLAgMBAAECggEATa3NbRVtJQuZmB74zBbe/3A5zob9nIVMRmhI5OfYxP24
-      zNkZOgHyPDvnhrdCStTbkQvv8vpwQuAwi22ya405g8IJlp1dYo8W0xbF1/XWDJIp
-      wFSRGTGpmErJeUXVE1A7Ncz3w30NN0XRyWQGAotLt6x8xShlEaKerf0rAhUkbJrB
-      jqpGaU2LJC3TWURUst0rk2nAGhuOgIRbpOXuAsmXkMSwd7yBqby//AL3yI1CPu9T
-      XQXk2Pa97YIGz67cGz1lyyiePm33jTDufca+vawizPgdHzhmLMpCdJKTqvrGASUf
-      6TDzlOjshawzvAGlvHXPjk11zopmN/ElwptUBHKwMQKBgQDq9VAFRTkFAucvQkBY
-      15ieiyC8tzcHiaZ32UTQJKeBy69zGzsObAWZ4eE3npA9beHVL1p5DmiGrAzitN6T
-      d3lfHrxJ2K7VSkT5JqKGNSelLo+w8aT4kQp+9LuNtvAGCOf/3oN6kPPMeoAMNFcD
-      td6Of2jc2AFbZGEKfefB2D8QsQKBgQDm0kqlld/1OYuLM/PcaoOij3nS0sOurecg
-      et8mdHtWLjoKJxHaQdqJxVZJJsP4Lb5EwGKTXo8r/6/+TMR+5ZkkkUiv7LOLTMHq
-      m/bHUEventPDnS/kuJ1IYqcCYlBc+YuHMoZdL2I/oVDKX9+IFzeBvjZogEUI80DI
-      rGUTkiC9OwKBgQDVsA36/R4CpMVFgeer5Uj0yGwZtjfiLxqrXXrsIqoFrg3/jgCD
-      +VKOxZRjVV6xv8HodYy/FI+UC94cQYs8ayiDjhyIvP0lFsrsHmspzCYmYNZmgx8a
-      wi7dkA8TsBFUK710RBcn3bUdfzv93YxV345t4wqn7/wr9nsbY67n6ZhRwQKBgQC3
-      Mmqal6SD7iNJ3XcMFuHZMMTAxhUXW+DYT40y6TpGwTPBgRbTQncf56a/MmxRWoTr
-      7kGOs3swsaPOUsGV8calVkX5kwVBZy91dEneEWXWD/sFA4nSn4/9tobVBpC/6jOK
-      n1gzN3tkAzWrGYLBcaPVbtGiCURBgUeGvgUPDmi7pwKBgQDAjIcN2g5J5SNzOAlH
-      a8qmVUfpPlOfG7k7wimcsmNCXAeztmR68hv6hdUVCU6UgO2vvVHAmTc5GaR34txu
-      Y2olpz9daEuOZ4ztca8Ga8S/GeQ5NnALgpnukZohU5at8K8fLudF9aF+62AJQUDE
-      bERKdV+OHpQwNos76HLIDVsCkg==
-      -----END PRIVATE KEY-----
+   remote_unlock:
+      edgevpn_token: b3RwOgogIGRodDoKICAgIGludGVydmFsOiA5MjIzMzcyMDM2ODU0Nzc1ODA3CiAgICBrZXk6IDN6cWpYeDBpNjZaZ3p6a2NQUHcxc1laWlNEUzZqUUE5eW5EdXNySXNieWcKICAgIGxlbmd0aDogNDMKICBjcnlwdG86CiAgICBpbnRlcnZhbDogOTIyMzM3MjAzNjg1NDc3NTgwNwogICAga2V5OiBhaEdSdDN4bjdMZHlBeEJDekhLYmJzZzg1dmZkTHl0Zm9yS2VOWjFzOGlhCiAgICBsZW5ndGg6IDQzCnJvb206IGQ1TXdIc3ZTbUpmdDl6Z0M0ZjBQeDBibnB6OWZUQ05JSFJoRE1KSHBhMlMKcmVuZGV6dm91czogZTk5ZW5sZ0JsWEl1c1B6bEJGSlZKSmVRVlE2ckNsTURJZEtkYXFVdXlncAptZG5zOiA4UWtZb29McWsyYURGSE02R3o5d3N2dEM2U1kxNWxnVlZBYlVOZ015RjlFCm1heF9tZXNzYWdlX3NpemU6IDIwOTcxNTIwCg==
+      # Public Key of the client
+      public_key: |
+         -----BEGIN PUBLIC KEY-----
+         MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAr9Pma8g7WxE9RQzH/TWk
+         2fUBDbrJFBqZzkyLUgpIE6YBo2FkUDILem+M3w6SsHXbLa7hukPiAcOTTcvTiOdG
+         wmb855dEyR440Pn4fodR9SRN/QyOpRGyCWBRdR7cRdSdU69iDin/XkyfZOjGcPGu
+         +fbvxl2LiEjvK3Z2oqAD0kKEwF/ShZmnctG3WY422OeBralVGvI2jtB1t3i9bRDo
+         uZThGoAT9DIT6uXWZL1AN5CxjwGUS1HdHurLTGXqGEMbnuW4thSSIYHCSNEEuDrm
+         iltSa4epycmSh/c3RpngLmM34T/rrRrYUIH9GoG5OgKhJX/o2XKPcdEooIFY6LGV
+         NwIDAQAB
+         -----END PUBLIC KEY-----
+      # Private Key of Droplet
+      private_key: |
+         -----BEGIN PRIVATE KEY-----
+         MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCqK2hsTTEWSlb2
+         lFNhnVJ6Rr4nSqnRp5ZSlHncp+wC8Y/0LLZeTRMsfLSNwOptQkG26ELvTcbLy26F
+         lo0jI7D/cpMlApt2yKzwczB1d4Ph9L6ahPsvDhISu+iHbK1fou8WmrPw63l+UXBD
+         lzU+mqyB5d3GxK3ndg4+K853zkcVLOmCBv4uuC/T3gnFdLL09ZDNdVV4RQ6qQMU3
+         F2XW/BSbqD9e/jvzVp0vh3CnJhQWppzAm3RoY/d7ZkC5DHCzc0YTIkFEsxLc4skj
+         CEv7gczw+wYWNdVdkq1C8DzizaBiAuCT+4kXiel6SpqjtMXDozw7EhUFlA48dhYC
+         Di7iX2vBAgMBAAECggEAT2GoeL0ZpPhQ0P4oV2T4UKonklS2G2M+MI+quVBsPINL
+         T/B7sknqI9qYr3fK4+UAmr6GWvPBRNhFWnP8quO/caqVEbLBqwu6AQD7HhD+qK1v
+         LM3UDwNVUv/tXR9JUU/EkJriTgTKzC5ZXG5xHB8zUfVVG6AsL8lWo5Hz4teLOUjT
+         IVtQSmsUUZNKI96kfCUdWJAHtp/qdz+TnkAcEQLUp6G16dJ7G8dl+JQDnxPn7why
+         VwhDLqfD/VDeQHHav7KKzx+p64rRfOgM+p6aT8NiBFOo8VNWYjhUIAKGbW34tOjb
+         rIyrbeAhF+w9/skgHqmhcXPLzXL8KzNwOLo8515DsQKBgQDdizBz7ysNZ1HRweDF
+         BhCZNbq3ufYClpM4YeFqgq9sSlUTDT0Hkw2frNLhSTVGkGaPyDpiwNZz17T+9lie
+         QMTiap3ISD6LqTKzcnOcLGP6PhJAQyJawI7riUdFdHbSEOZymQOlhw4WIZsahiD1
+         ADLuFyq3r82ysnXcWt6ZgcTrDwKBgQDEor7yKvUUQBHumcLz+O3uZq5jaCnb4o6+
+         lzbmc+TpE2gpTwnQNUHGNgTyFVyQRYBzEQJtih6oeXteFglOqrUAEIgDqS5hsK1b
+         Ghe10Xr9ioAofdz8SrILJI2MJdpsFhSNsCNmEmnQZgFYbrV8oGN50zRkUzS1hWHE
+         QLR6ENN8LwKBgGhwSGwu8H3GGjUnD73xyPtg79/S451+vHJU+j4K04XaWNa9Y+rh
+         MQf4IgWgTGQyiJb5jkSlobNEmgejvE0GPYp7NlyHaizOm58qskOKTatXfaUbwONF
+         aVqyAY5FhAote2XEqopq64IVX5gWaQz2hgvlkfa8At1d8d/qWovFOD6TAoGAFTKa
+         NQ8Odo1loXwv+Q8Xz0CAgjTjdlHZI5C3mWZbAglWjEV6AFkNaym9pL9KyD7F1yG5
+         Ske+gFkARKdJf5KFiqk9kG93kY5zUcPhVHdts9FveW4AGa6PvQXGwJoADvDebFvV
+         pRZNE+s7L+ZXaET+FE8BceNKZlsnq/lxu0r/EX8CgYAdCXd8Z7Cax8DKQGNh/8Ey
+         36A8a8IRP+huJ6pVe0f3Zol/C18qC7pXUwdGHujgZhwfXhEfybWvQnYV2SMS2xlZ
+         bysOC8OWjs8YvNXkwmljpjpLGM0DijchlYyqpRTvhKU81r5brZrtqnKBcvYUmAX9
+         BiUnQOy/dsZQJp4pcd4y2A==

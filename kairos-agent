@@ -1,2 +1,0 @@
-#!/bin/bash
-yq '.kcrypt.remote_unlock' < ./testdata/testconfig.yaml

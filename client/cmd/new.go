@@ -22,39 +22,36 @@ var newCmd = &cobra.Command{
 	Use:   "new",
 	Short: "Initalize a new client config",
 	Run: func(cmd *cobra.Command, args []string) {
-		privKey, err := rsa.GenerateKey(rand.Reader, 2048)
+		// dropleet
+		priv1, pub1, err := generateKeyPair()
 		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to generate private key")
+			log.Fatal().Err(err).Msg("Failed to generate first keypair")
 		}
-		pubKey := privKey.Public()
+		// client
+		priv2, pub2, err := generateKeyPair()
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to generate second keypair")
+		}
 
-		publicBlock, err := x509.MarshalPKIXPublicKey(pubKey)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to marshal public key")
-		}
-		pemPublicKey := string(pem.EncodeToMemory(&pem.Block{
-			Type:  "PUBLIC KEY",
-			Bytes: publicBlock,
-		}))
-
-		privateBlock, err := x509.MarshalPKCS8PrivateKey(privKey)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to marshal private key")
-		}
-		pemPrivateKey := string(pem.EncodeToMemory(&pem.Block{
-			Type:  "PRIVATE KEY",
-			Bytes: privateBlock,
-		}))
 		token := nodepair.GenerateToken()
 
-		fmt.Printf(`kcrypt
+		fmt.Printf(`======[Droplet Configuration]======
+
+kcrypt:
    remote_unlock:
       edgevpn_token: %s
+      # Public Key of the client
       public_key: |
 %s
+      # Private Key of Droplet
       private_key: |
 %s
-`, token, padLeft(pemPublicKey), padLeft(pemPrivateKey))
+
+======[client_priv.pem]======
+%s
+======[droplet_pub.pem]======
+%s
+`, token, padLeft(pub2), padLeft(priv1), priv2, pub1)
 	},
 }
 
@@ -70,4 +67,31 @@ func padLeft(data string) string {
 		res[i] = fmt.Sprintf("         %s", line)
 	}
 	return strings.Join(res, "\n")
+}
+
+func generateKeyPair() (string, string, error) {
+	privKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		return "", "", fmt.Errorf("Failed to generate private key: %w", err)
+	}
+	pubKey := privKey.Public()
+
+	publicBlock, err := x509.MarshalPKIXPublicKey(pubKey)
+	if err != nil {
+		return "", "", fmt.Errorf("Failed to marshal public key: %w", err)
+	}
+	pemPublicKey := string(pem.EncodeToMemory(&pem.Block{
+		Type:  "PUBLIC KEY",
+		Bytes: publicBlock,
+	}))
+
+	privateBlock, err := x509.MarshalPKCS8PrivateKey(privKey)
+	if err != nil {
+		return "", "", fmt.Errorf("Failed to marshal private key: %w", err)
+	}
+	pemPrivateKey := string(pem.EncodeToMemory(&pem.Block{
+		Type:  "PRIVATE KEY",
+		Bytes: privateBlock,
+	}))
+	return pemPrivateKey, pemPublicKey, nil
 }
