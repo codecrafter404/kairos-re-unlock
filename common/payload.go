@@ -58,7 +58,7 @@ func (r Payload) DecryptPassword(privateKey string) (string, error) {
 	return string(data), nil
 }
 
-func (r Payload) signPayload(privateKey string) error {
+func (r *Payload) signPayload(privateKey string) error {
 	privKey, err := ParsePrivateKey(privateKey)
 	if err != nil {
 		return fmt.Errorf("Failed to parse private key: %w", err)

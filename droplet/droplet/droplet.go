@@ -44,6 +44,7 @@ func getResponse(config Config) (string, error) {
 	ctx, _ := context.WithCancel(context.Background())
 	payload := &common.Payload{}
 
+	log.Info().Msg("Waiting for payload")
 	err := nodepair.Receive(ctx, payload, nodepair.WithToken(config.EdgeVPNToken))
 
 	if err != nil {
