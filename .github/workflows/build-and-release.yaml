@@ -44,7 +44,12 @@ jobs:
         with:
           pattern: "*.zip"
           path: /tmp/artifacts
-      - run: unzip /tmp/artifacts/*.zip -d /tmp/artifacts/
+      - run: |
+          for zipfile in /tmp/artifacts*.zip; do
+              if [ -f "$zipfile" ]; then
+                  unzip -o "$zipfile" -d /tmp
+              fi
+          done
       # - uses: anothrNick/github-tag-action@4ed44965e0db8dab2b466a16da04aec3cc312fd8
       # - uses: actions-ecosystem/action-get-latest-tag@v1
       #   id: get-latest-tag
