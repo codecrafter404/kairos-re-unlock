@@ -37,6 +37,8 @@ jobs:
       custom_artifact_format: "kairos-rpi"
   release:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
     needs: ["build-amd64", "build-rpi"]
     steps:
       - run: mkdir /tmp/artifacts
