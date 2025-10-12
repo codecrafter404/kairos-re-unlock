@@ -31,6 +31,11 @@ jobs:
       raw: true
       summary_artifacts: true
       arch: arm64
+      # to bypass the push step
+      registry_domain: ttl.sh
+      registry_repository: eee2e1d0-c92a-408f-80bd-11247f4dc553
+      custom_tag_format: "10s"
+
       kubernetes_version: "v1.34.1+k3s1"
       kubernetes_distro: k3s
       dockerfile_path: Dockerfile
