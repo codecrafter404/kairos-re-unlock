@@ -47,6 +47,7 @@ func main() {
 
 func checkErr(err error) {
 	if err != nil {
+		log.Err(err).Msg("Error occured")
 		fmt.Println(err)
 		os.Exit(1)
 	}
