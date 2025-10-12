@@ -767,17 +767,17 @@ jobs:
             exit 1
           fi
 
-      - name: Create OCI artifact from RAW image
-        if: inputs.raw
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ${{ env.DOCKERFILE_IMG_PATH }}
-          platforms: linux/${{ inputs.arch }}
-          push: true
-          tags: ${{ steps.setup.outputs.image_tag }}-img
-          build-args: |
-            ARTIFACT=${{ env.RAW_ARTIFACT }}
+      # - name: Create OCI artifact from RAW image
+      #   if: inputs.raw
+      #   uses: docker/build-push-action@v6
+      #   with:
+      #     context: .
+      #     file: ${{ env.DOCKERFILE_IMG_PATH }}
+      #     platforms: linux/${{ inputs.arch }}
+      #     push: true
+      #     tags: ${{ steps.setup.outputs.image_tag }}-img
+      #     build-args: |
+      #       ARTIFACT=${{ env.RAW_ARTIFACT }}
 
       - name: Compute checksums for generated artifacts
         if: (inputs.iso || inputs.raw || inputs.vhd || inputs.tar) && inputs.compute_checksums
