@@ -50,6 +50,9 @@ jobs:
                   unzip -o "$zipfile" -d /tmp
               fi
           done
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: '0'
       - uses: anothrNick/github-tag-action@4ed44965e0db8dab2b466a16da04aec3cc312fd8
         id: tag
       - uses: ncipollo/release-action@v1.20.0
