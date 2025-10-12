@@ -1,0 +1,31 @@
+name: Build
+on:
+  workflow_dispatch:
+    
+jobs:
+  build-amd64:
+    uses: ./.github/workflows/factory.yaml
+    with:
+      version: "auto"
+      base_image: "alpine:3.22"
+      model: "generic"
+      iso: true
+      summary_artifacts: true
+      arch: amd64
+      kubernetes_version: "v1.33.4"
+      kubernetes_distro: k3s
+      dockerfile_path: Dockerfile
+      custom_artifact_format: "kairos-amd64"
+  build-rpi:
+    uses: ./.github/workflows/factory.yaml
+    with:
+      version: "auto"
+      base_image: "alpine:3.22"
+      model: "rpi4"
+      iso: true
+      summary_artifacts: true
+      arch: arm64
+      kubernetes_version: "v1.33.4"
+      kubernetes_distro: k3s
+      dockerfile_path: Dockerfile
+      custom_artifact_format: "kairos-amd64"
