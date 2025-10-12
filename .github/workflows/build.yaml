@@ -18,7 +18,7 @@ jobs:
       iso: true
       summary_artifacts: true
       arch: amd64
-      kubernetes_version: "v1.33.4"
+      kubernetes_version: "v1.34.1+k3s1"
       kubernetes_distro: k3s
       dockerfile_path: Dockerfile
       custom_artifact_format: "kairos-amd64"
@@ -31,7 +31,7 @@ jobs:
       iso: true
       summary_artifacts: true
       arch: arm64
-      kubernetes_version: "v1.33.4"
+      kubernetes_version: "v1.34.1+k3s1"
       kubernetes_distro: k3s
       dockerfile_path: Dockerfile
       custom_artifact_format: "kairos-amd64"
