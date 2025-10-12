@@ -1,4 +1,6 @@
 name: Build
+on:
+  workflow_dispatch:
 permissions:
   id-token: write  # OIDC support
   contents: write
