@@ -43,10 +43,6 @@ func findConfig(dirs []string) (Config, error) {
 	confs := []Config{}
 	for _, dir := range dirs {
 		filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
-			if d.IsDir() {
-				return nil
-			}
-
 			// try parse
 			if conf := tryParse(path); conf != nil {
 				confs = append(confs, *conf)
