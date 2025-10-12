@@ -43,6 +43,7 @@ on:
       version:
         type: string
         required: true
+        default: "auto"
       
       trusted_boot:
         type: boolean
