@@ -50,9 +50,11 @@ jobs:
                   unzip -o "$zipfile" -d /tmp
               fi
           done
-      # - uses: anothrNick/github-tag-action@4ed44965e0db8dab2b466a16da04aec3cc312fd8
-      # - uses: actions-ecosystem/action-get-latest-tag@v1
-      #   id: get-latest-tag
+      - uses: anothrNick/github-tag-action@4ed44965e0db8dab2b466a16da04aec3cc312fd8
+        id: tag
       - uses: ncipollo/release-action@v1.20.0
         with:
           artifacts: "/tmp/artifacts/*.iso,/tmp/artifacts/*.raw"
+          tag: ${{ steps.tag.outputs.tag }}
+          skipIfReleaseExists: true
+
