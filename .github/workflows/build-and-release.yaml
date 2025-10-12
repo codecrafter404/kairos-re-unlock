@@ -42,7 +42,7 @@ jobs:
       - run: mkdir /tmp/artifacts
       - uses: actions/download-artifact@v5
         with:
-          pattern: *.zip
+          pattern: "*.zip"
           path: /tmp/artifacts
       - run: unzip /tmp/artifacts/*.zip -d /tmp/artifacts/
       # - uses: anothrNick/github-tag-action@4ed44965e0db8dab2b466a16da04aec3cc312fd8
