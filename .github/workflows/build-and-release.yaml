@@ -7,18 +7,21 @@ permissions:
   actions: read
   security-events: write
   models: none
+env:
+  KUBERNETES_VERSION: "v1.34.1+k3s1"
+  BASE_IMAGE: "alpine:3.22"
     
 jobs:
   build-amd64:
     uses: ./.github/workflows/factory.yaml
     with:
       version: "auto"
-      base_image: "alpine:3.22"
+      base_image: ${{ env.BASE_IMAGE }}
       model: "generic"
       iso: true
       summary_artifacts: true
       arch: amd64
-      kubernetes_version: "v1.34.1+k3s1"
+      kubernetes_version: ${{ env.KUBERNETES_VERSION }}
       kubernetes_distro: k3s
       dockerfile_path: Dockerfile
       custom_artifact_format: "kairos-amd64"
@@ -26,12 +29,12 @@ jobs:
     uses: ./.github/workflows/factory.yaml
     with:
       version: "auto"
-      base_image: "alpine:3.22"
+      base_image: ${{ env.BASE_IMAGE }}
       model: "rpi4"
       raw: true
       summary_artifacts: true
       arch: arm64
-      kubernetes_version: "v1.34.1+k3s1"
+      kubernetes_version: ${{ env.KUBERNETES_VERSION }}
       kubernetes_distro: k3s
       dockerfile_path: Dockerfile
       custom_artifact_format: "kairos-rpi"
