@@ -31,8 +31,8 @@ jobs:
       - name: Set environment outputs
         id: set-env
         run: |
-          echo "kubernetes_version=${{ needs.setup-version.outputs.kubernetes_version }}" >> "$GITHUB_OUTPUT"
-          echo "base_image=${{ needs.setup-version.outputs.base_image }}" >> "$GITHUB_OUTPUT"
+          echo "kubernetes_version=${{ env.KUBERNETES_VERSION }}" >> "$GITHUB_OUTPUT"
+          echo "base_image=${{ env.BASE_IMAGE }}" >> "$GITHUB_OUTPUT"
   build-amd64:
     needs: setup-version
     uses: ./.github/workflows/factory.yaml
