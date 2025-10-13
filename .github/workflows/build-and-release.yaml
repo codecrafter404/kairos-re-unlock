@@ -15,6 +15,10 @@ env:
 jobs:
   setup-version:
     runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.tag.outputs.tag }}
+      kubernetes_version: ${{ steps.set-env.outputs.kubernetes_version }}
+      base_image: ${{ steps.set-env.outputs.base_image }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -24,18 +28,23 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG_PREFIX: v
         id: tag
-      - run: echo "VERSION=${{ steps.tag.outputs.tag }}" >> "$GITHUB_ENV"
+      - name: Set environment outputs
+        id: set-env
+        run: |
+          echo "kubernetes_version=${{ needs.setup-version.outputs.kubernetes_version }}" >> "$GITHUB_OUTPUT"
+          echo "base_image=${{ needs.setup-version.outputs.base_image }}" >> "$GITHUB_OUTPUT"
   build-amd64:
     needs: setup-version
     uses: ./.github/workflows/factory.yaml
+    secrets: inherit
     with:
       version: "auto"
-      base_image: ${{ env.BASE_IMAGE }}
+      base_image: ${{ needs.setup-version.outputs.base_image }}
       model: "generic"
       iso: true
       summary_artifacts: true
       arch: amd64
-      kubernetes_version: ${{ env.KUBERNETES_VERSION }}
+      kubernetes_version: ${{ needs.setup-version.outputs.kubernetes_version }}
       kubernetes_distro: k3s
       dockerfile_path: Dockerfile
       custom_artifact_format: "kairos-amd64"
@@ -51,14 +60,15 @@ jobs:
   build-rpi:
     needs: setup-version
     uses: ./.github/workflows/factory.yaml
+    secrets: inherit
     with:
       version: "auto"
-      base_image: ${{ env.BASE_IMAGE }}
+      base_image: ${{ needs.setup-version.outputs.base_image }}
       model: "rpi4"
       raw: true
       summary_artifacts: true
       arch: arm64
-      kubernetes_version: ${{ env.KUBERNETES_VERSION }}
+      kubernetes_version: ${{ needs.setup-version.outputs.kubernetes_version }}
       kubernetes_distro: k3s
       dockerfile_path: Dockerfile
       custom_artifact_format: "kairos-rpi"
@@ -101,5 +111,5 @@ jobs:
       - uses: ncipollo/release-action@v1.20.0
         with:
           artifacts: ${{ steps.artifacts.outputs.artifacts }}
-          tag: ${{ env.VERSION }}
+          tag: ${{ needs.setup-version.outputs.version }}
           skipIfReleaseExists: true
