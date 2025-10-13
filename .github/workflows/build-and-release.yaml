@@ -52,6 +52,7 @@ jobs:
                   unzip -o "$zipfile" -d /tmp/artifacts/
               fi
           done
+      - run: find /tmp/
       - uses: actions/checkout@v4
         with:
           fetch-depth: '0'
