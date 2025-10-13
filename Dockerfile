@@ -6,8 +6,6 @@ ARG KAIROS_INIT=v0.6.0-RC1
 FROM golang:1.25.1 AS builder
 WORKDIR /workdir
 COPY . .
-ENV GOOS=linux
-ENV GOARCH=${ARCH}
 ENV CGO_ENABLED=0
 RUN go mod download
 RUN go build -o kairos-re-unlock ./droplet/main.go
