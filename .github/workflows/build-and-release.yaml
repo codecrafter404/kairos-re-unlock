@@ -52,7 +52,6 @@ jobs:
                   unzip -o "$zipfile" -d /tmp/artifacts/
               fi
           done
-      - run: find /tmp/
       - uses: actions/checkout@v4
         with:
           fetch-depth: '0'
@@ -62,9 +61,18 @@ jobs:
           TAG_PREFIX: v
 
         id: tag
+      - run: |
+          arts=$(python3 -c 'import os
+          res = []
+          for root, dirs, files in os.walk("/tmp/"):
+              for name in files:
+                  if name.endswith(".raw") or name.endswith(".iso"):
+                      res.append(os.path.join(root, name))
+          print(str.join(",", res))')
+          echo "artifacts=${arts}" >> ""$GITHUB_OUTPUT""
+        id: artifacts
       - uses: ncipollo/release-action@v1.20.0
         with:
-          artifacts: "/tmp/artifacts/*.iso,/tmp/artifacts/*.raw"
+          artifacts: ${{ steps.artifacts.outputs.artifacts }}
           tag: ${{ steps.tag.outputs.tag }}
           skipIfReleaseExists: true
-
