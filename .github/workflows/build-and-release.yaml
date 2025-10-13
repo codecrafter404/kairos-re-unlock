@@ -84,7 +84,7 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: write
-    needs: ["build-amd64", "build-rpi"]
+    needs: ["build-amd64", "build-rpi", "setup-version"]
     steps:
       - run: mkdir /tmp/artifacts
       - uses: actions/download-artifact@v5
