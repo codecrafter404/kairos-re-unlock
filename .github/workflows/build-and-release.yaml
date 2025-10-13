@@ -56,6 +56,10 @@ jobs:
         with:
           fetch-depth: '0'
       - uses: anothrNick/github-tag-action@4ed44965e0db8dab2b466a16da04aec3cc312fd8
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_PREFIX: v
+
         id: tag
       - uses: ncipollo/release-action@v1.20.0
         with:
