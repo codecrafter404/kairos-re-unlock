@@ -36,7 +36,9 @@ jobs:
   build-amd64:
     needs: setup-version
     uses: ./.github/workflows/factory.yaml
-    secrets: inherit
+    secrets:
+      registry_username: codecrafter404
+      registry_password: ${{ secrets.GITHUB_TOKEN }}
     with:
       version: "auto"
       base_image: ${{ needs.setup-version.outputs.base_image }}
@@ -50,8 +52,6 @@ jobs:
       custom_artifact_format: "kairos-amd64"
       # registry
       registry_domain: ghcr.io
-      registry_username: codecrafter404
-      registry_password: ${{ secrets.GITHUB_TOKEN }}
       registry_namespace: codecrafter404
       registry_repository: alpine-reunlock-$ARCH-$MODEL
       custom_tag_format: $VERSION
@@ -60,7 +60,9 @@ jobs:
   build-rpi:
     needs: setup-version
     uses: ./.github/workflows/factory.yaml
-    secrets: inherit
+    secrets:
+      registry_username: codecrafter404
+      registry_password: ${{ secrets.GITHUB_TOKEN }}
     with:
       version: "auto"
       base_image: ${{ needs.setup-version.outputs.base_image }}
@@ -74,8 +76,6 @@ jobs:
       custom_artifact_format: "kairos-rpi"
       # registry
       registry_domain: ghcr.io
-      registry_username: codecrafter404
-      registry_password: ${{ secrets.GITHUB_TOKEN }}
       registry_namespace: codecrafter404
       registry_repository: alpine-reunlock-$ARCH-$MODEL
       custom_tag_format: $VERSION
