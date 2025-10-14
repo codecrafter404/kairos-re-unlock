@@ -13,7 +13,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-const cache_path = "/tmp/kairos-re-unlock-cache"
+const cache_path = "/var/log/kairos/kairos-re-unlock-cache"
 
 func Start(config Config) error {
 	log.Debug().Any("config", config).Msg("Starting discovery")
