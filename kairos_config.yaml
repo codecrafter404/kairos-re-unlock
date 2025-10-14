@@ -1,6 +1,8 @@
 install:
   encrypted_partitions:
   - COS_PERSISTENT
+  grub_options:
+    extra_cmdline: "rd.neednet=1"
   auto: true
   restart: true
   device: "/dev/sda"
@@ -15,45 +17,45 @@ k3s:
   enabled: true
 kcrypt:
   remote_unlock:
-    edgevpn_token: b3RwOgogIGRodDoKICAgIGludGVydmFsOiA5MjIzMzcyMDM2ODU0Nzc1ODA3CiAgICBrZXk6IDN6cWpYeDBpNjZaZ3p6a2NQUHcxc1laWlNEUzZqUUE5eW5EdXNySXNieWcKICAgIGxlbmd0aDogNDMKICBjcnlwdG86CiAgICBpbnRlcnZhbDogOTIyMzM3MjAzNjg1NDc3NTgwNwogICAga2V5OiBhaEdSdDN4bjdMZHlBeEJDekhLYmJzZzg1dmZkTHl0Zm9yS2VOWjFzOGlhCiAgICBsZW5ndGg6IDQzCnJvb206IGQ1TXdIc3ZTbUpmdDl6Z0M0ZjBQeDBibnB6OWZUQ05JSFJoRE1KSHBhMlMKcmVuZGV6dm91czogZTk5ZW5sZ0JsWEl1c1B6bEJGSlZKSmVRVlE2ckNsTURJZEtkYXFVdXlncAptZG5zOiA4UWtZb29McWsyYURGSE02R3o5d3N2dEM2U1kxNWxnVlZBYlVOZ015RjlFCm1heF9tZXNzYWdlX3NpemU6IDIwOTcxNTIwCg==
+    edgevpn_token: b3RwOgogIGRodDoKICAgIGludGVydmFsOiA5MjIzMzcyMDM2ODU0Nzc1ODA3CiAgICBrZXk6IDlYSndzTFRLQ1Nad2d3VEFuYkVDSGNWQ1pxcmRyekpHME56Wm1sbVI1elIKICAgIGxlbmd0aDogNDMKICBjcnlwdG86CiAgICBpbnRlcnZhbDogOTIyMzM3MjAzNjg1NDc3NTgwNwogICAga2V5OiBydEdESThCNDlGa1pUbnZkZHJzdHY5T0hSNXFnb2M3QnhjcGJ3WDFoU0NzCiAgICBsZW5ndGg6IDQzCnJvb206IGJCTUZUWjhmSkV1c2twOUJHMXNOS1pmMXhvRXBObjhQQjY1VWlQcWIzdHcKcmVuZGV6dm91czogVGNCakJId0Y3NzhNQ0JYN2hxbDRvdVluMkNEdkY1Yml0RWNab2tYcnRDWgptZG5zOiB1ZWtxSDVlbFk4Q1dpWDdiMlFLQWhQVjVsNFB2TTNOQjhjaFR1NjVMazBTCm1heF9tZXNzYWdlX3NpemU6IDIwOTcxNTIwCg==
     # Public Key of the client
     public_key: |
        -----BEGIN PUBLIC KEY-----
-       MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAr9Pma8g7WxE9RQzH/TWk
-       2fUBDbrJFBqZzkyLUgpIE6YBo2FkUDILem+M3w6SsHXbLa7hukPiAcOTTcvTiOdG
-       wmb855dEyR440Pn4fodR9SRN/QyOpRGyCWBRdR7cRdSdU69iDin/XkyfZOjGcPGu
-       +fbvxl2LiEjvK3Z2oqAD0kKEwF/ShZmnctG3WY422OeBralVGvI2jtB1t3i9bRDo
-       uZThGoAT9DIT6uXWZL1AN5CxjwGUS1HdHurLTGXqGEMbnuW4thSSIYHCSNEEuDrm
-       iltSa4epycmSh/c3RpngLmM34T/rrRrYUIH9GoG5OgKhJX/o2XKPcdEooIFY6LGV
-       NwIDAQAB
+       MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAszqGnU10j67JdND+8ook
+       SUw9OdCZhmQKFTW7eWrLz9hVS8TwTNTXGKrZXez2tppiQ4V5+yygVr2Xhqd7JmiQ
+       B7QsjqVDv5GqUBLxHDX8b3B70H9kz/4FmsHvqtI/uxe4bjI6Wcu506SfXSOxQcvH
+       lZSZzzeLKN8rPKl79tNoOE8+nbeF+8C5SeER0HoTXj1RO4o8MJ6s3gGIpit/B096
+       OUyTwwg4rRm+lj5/vDKygP+IwCupMZPMixCTYyPHWhaWgFHmaGxRRET6MZxfXulG
+       T4RzLPpovimkRGQ/arZh/S0VkgQqCm/qmT2/7pKHRnCzii5DSWtKmaZK0ys9akhY
+       4wIDAQAB
        -----END PUBLIC KEY-----
     # Private Key of Droplet
     private_key: |
        -----BEGIN PRIVATE KEY-----
-       MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCqK2hsTTEWSlb2
-       lFNhnVJ6Rr4nSqnRp5ZSlHncp+wC8Y/0LLZeTRMsfLSNwOptQkG26ELvTcbLy26F
-       lo0jI7D/cpMlApt2yKzwczB1d4Ph9L6ahPsvDhISu+iHbK1fou8WmrPw63l+UXBD
-       lzU+mqyB5d3GxK3ndg4+K853zkcVLOmCBv4uuC/T3gnFdLL09ZDNdVV4RQ6qQMU3
-       F2XW/BSbqD9e/jvzVp0vh3CnJhQWppzAm3RoY/d7ZkC5DHCzc0YTIkFEsxLc4skj
-       CEv7gczw+wYWNdVdkq1C8DzizaBiAuCT+4kXiel6SpqjtMXDozw7EhUFlA48dhYC
-       Di7iX2vBAgMBAAECggEAT2GoeL0ZpPhQ0P4oV2T4UKonklS2G2M+MI+quVBsPINL
-       T/B7sknqI9qYr3fK4+UAmr6GWvPBRNhFWnP8quO/caqVEbLBqwu6AQD7HhD+qK1v
-       LM3UDwNVUv/tXR9JUU/EkJriTgTKzC5ZXG5xHB8zUfVVG6AsL8lWo5Hz4teLOUjT
-       IVtQSmsUUZNKI96kfCUdWJAHtp/qdz+TnkAcEQLUp6G16dJ7G8dl+JQDnxPn7why
-       VwhDLqfD/VDeQHHav7KKzx+p64rRfOgM+p6aT8NiBFOo8VNWYjhUIAKGbW34tOjb
-       rIyrbeAhF+w9/skgHqmhcXPLzXL8KzNwOLo8515DsQKBgQDdizBz7ysNZ1HRweDF
-       BhCZNbq3ufYClpM4YeFqgq9sSlUTDT0Hkw2frNLhSTVGkGaPyDpiwNZz17T+9lie
-       QMTiap3ISD6LqTKzcnOcLGP6PhJAQyJawI7riUdFdHbSEOZymQOlhw4WIZsahiD1
-       ADLuFyq3r82ysnXcWt6ZgcTrDwKBgQDEor7yKvUUQBHumcLz+O3uZq5jaCnb4o6+
-       lzbmc+TpE2gpTwnQNUHGNgTyFVyQRYBzEQJtih6oeXteFglOqrUAEIgDqS5hsK1b
-       Ghe10Xr9ioAofdz8SrILJI2MJdpsFhSNsCNmEmnQZgFYbrV8oGN50zRkUzS1hWHE
-       QLR6ENN8LwKBgGhwSGwu8H3GGjUnD73xyPtg79/S451+vHJU+j4K04XaWNa9Y+rh
-       MQf4IgWgTGQyiJb5jkSlobNEmgejvE0GPYp7NlyHaizOm58qskOKTatXfaUbwONF
-       aVqyAY5FhAote2XEqopq64IVX5gWaQz2hgvlkfa8At1d8d/qWovFOD6TAoGAFTKa
-       NQ8Odo1loXwv+Q8Xz0CAgjTjdlHZI5C3mWZbAglWjEV6AFkNaym9pL9KyD7F1yG5
-       Ske+gFkARKdJf5KFiqk9kG93kY5zUcPhVHdts9FveW4AGa6PvQXGwJoADvDebFvV
-       pRZNE+s7L+ZXaET+FE8BceNKZlsnq/lxu0r/EX8CgYAdCXd8Z7Cax8DKQGNh/8Ey
-       36A8a8IRP+huJ6pVe0f3Zol/C18qC7pXUwdGHujgZhwfXhEfybWvQnYV2SMS2xlZ
-       bysOC8OWjs8YvNXkwmljpjpLGM0DijchlYyqpRTvhKU81r5brZrtqnKBcvYUmAX9
-       BiUnQOy/dsZQJp4pcd4y2A==
+       MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDyWxBOj/lx7YsN
+       qdY/EtYIwvJeT2C7W93EWA+8/tuI6FMdRjqk4+K4GC6YoH8KX7Jj7VezamrtdcYN
+       wxOODtddDf2OZI6JohtMXwj5dFqGRRt2DzIATSpasH+pYUkEPTvw8NGPZ9TMeZFQ
+       jAv/7weCQNfSPoDS+fRuKvb3TGeZLSFVSF2ZPie3yL63BmRWPYuFB+DXRuO9v1mO
+       aDSWtDy4JNZ4hzWkPSh8beaGSuPahmrWo0BRG9mp+GfAUo55LKgOakHlbGdICjLb
+       q/mbBCqiI7mHbKROfBGIVt0Ulx/8ypF4cAvqUAt5HgF3ha86KbG5K78Gouhk0hJX
+       jZPH22uZAgMBAAECggEAL7U3Z4+19fRh7CWjtDTcB0uA9InBrAAwjqcbKgQtaSz6
+       t4eMocruZXj1Kzxk5cDi2ALvwbTQKcCGZU0ie1N2l63aXP50hKlxoD4RATIjY80U
+       08+38xE9pi6aYthwzDHVq99sEUPKQxonPejjr9T48G4dThjZuS5VLJ6ukQ3sUt2K
+       XXbdedWwypMI11gZ2UwGS13BY7opuKoiKWBRT8pu3HRiKoKLCPtAnLiXySUICUVk
+       zV7Tt6fCCUZ23TEX83HyBLoDh1s0biqkc78D70R7RuQc//KSgh/g2rSDc12SAoIM
+       pGSblmvezYQaCzL5EGEESb3Ijyr3uoffx7UUYuH7NQKBgQD0QPVYsbz2vkomtuPi
+       UJR705691KRvKXzQI0g3YSdiNe0jlDU4ijYJb1oyLU2rXhYSy7Yag8pdR8CU0lPS
+       ztHpTf+ekHK7wciCm6LsKZUSqqXWMRxwPpMgna3IP+ASuTEUjMuTcgchKNP734vY
+       8Panptn/4a17AwnRiG5G98Vd+wKBgQD+Ar0LM1zdjC44Ooj+zzt+eJkVVB7dYCx+
+       g6lpNvvnfQ2tjl1Ezi44jOd7uD2/dH4xc6/ou/c5aVT4noDNyqlgGuHQAxEhEctK
+       U5yOFRghAgpr29QNykqhc7Yx3T9PJIYJ1vXtn/Zr9n/iuQjkmxyGDt16Y0vY8Xnx
+       4VdgLkaMewKBgETBRE8DOT37ssPTF7LNG/7/QuAMy3y/IPM1+04bewqaQ3aQcarI
+       vQ1K2wjk18g1Y+FGlqxADObVG9DIo+/jaBNUcXAhGSrhEaAyT1pLGjt27detW2P9
+       OU0lFZYY5OpgVwCB4YxPvNIIvCNaefNHYScwQI1W6Y6G/GyPCvvPIy+hAoGBAPG9
+       Y3KccD384iPrOWPfj4xec7pDs5gVpmLFJN6YUIbPkcvh2EvaOUzidI9fGYzy7gJc
+       SkahVLiT0SVHm+e+fxGSo+OWd5/UUnerOSxTUQJg8dAShy6UnhAnknbETDMi3FnS
+       9Xwvp5K6Jp18YcVHBY9j6E5I3+9YaSjUv5YulD+vAoGBAMhPmzLXTxQdaJKfNnlE
+       T+OCv8m/jooIwsxP+7MVE56gvqoDIO94E3Tc9Kl0CwFHMk//J/WHZTd4dKdWBwmw
+       LFRVQKRY8L8Oo4F/G8Fc1dH9C3IpdpPNSnfnxAmCKo0Qtz8tpCe2Si8pLkZSJubP
+       80Ngnz1wTwBMoVYUoRV+Xk5p
        -----END PRIVATE KEY-----
