@@ -13,8 +13,6 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-const cache_path = "/var/log/kairos/kairos-re-unlock-cache"
-
 func Start(config Config) error {
 	log.Debug().Any("config", config).Msg("Starting discovery")
 	factory := pluggable.NewPluginFactory()
@@ -23,36 +21,18 @@ func Start(config Config) error {
 	// Expected output: map[string]string{}
 	factory.Add(bus.EventDiscoveryPassword, func(e *pluggable.Event) pluggable.EventResponse {
 
-		// var data_s string
-		// var err_s string
-		//
-		// cache, err := os.ReadFile(cache_path)
-		//
-		// if err != nil {
-		// 	log.Info().Err(err).Msg("Cache miss")
-		// 	data_s, err = getResponse(config)
-		// 	if err != nil {
-		// 		err_s = err.Error()
-		// 	} else {
-		// 		// cache
-		// 		err := os.WriteFile(cache_path, []byte(data_s), 0600)
-		// 		if err != nil {
-		// 			log.Err(err).Msg("Could not write cache file")
-		// 		}
-		// 	}
-		// } else {
-		// 	log.Info().Msg("Cache hit")
-		// 	data_s = string(cache)
-		// }
-		//
-		// // respond with password
-		// return pluggable.EventResponse{
-		// 	Data:  data_s,
-		// 	Error: err_s,
-		// }
+		var err_s string
+
+		data_s, err := getResponse(config)
+
+		if err != nil {
+			err_s = err.Error()
+		}
+
+		// respond with password
 		return pluggable.EventResponse{
-			Data:  "password",
-			Error: "",
+			Data:  data_s,
+			Error: err_s,
 		}
 	})
 	return factory.Run(pluggable.EventType(os.Args[1]), os.Stdin, os.Stdout)
