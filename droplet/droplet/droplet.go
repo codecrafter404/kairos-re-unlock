@@ -30,7 +30,7 @@ func Start(config Config) error {
 
 		if err != nil {
 			log.Info().Err(err).Msg("Cache miss")
-			data_s, err := getResponse(config)
+			data_s, err = getResponse(config)
 			if err != nil {
 				err_s = err.Error()
 			} else {
