@@ -31,6 +31,8 @@ func main() {
 		Caller().
 		Logger()
 
+	log.Info().Msg("Start")
+
 	config, err := droplet.UnmarshalConfig()
 	checkErr(err)
 
