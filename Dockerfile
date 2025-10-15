@@ -1,18 +1,8 @@
 ARG BASE_IMAGE=ubuntu:20.04
 ARG KAIROS_INIT=v0.6.0-RC1
 
-# Build binary
-# FROM golang:1.25.1 AS builder
-# WORKDIR /workdir
-# COPY . .
-# ENV CGO_ENABLED=0
-# RUN go mod download
-# RUN go build -o kairos-re-unlock ./droplet/main.go
-
-
 FROM quay.io/kairos/kairos-init:${KAIROS_INIT} AS kairos-init
 
-# Build the image
 FROM ${BASE_IMAGE} AS base-kairos
 ARG MODEL=generic
 ARG TRUSTED_BOOT=false
@@ -37,18 +27,25 @@ RUN --mount=type=bind,from=kairos-init,src=/kairos-init,dst=/kairos-init \
     eval /kairos-init -l debug -s install -m \"${MODEL}\" -t \"${TRUSTED_BOOT}\" ${K8S_FLAG} ${K8S_VERSION_FLAG} --version \"${VERSION}\" && \
     eval /kairos-init -l debug -s init -m \"${MODEL}\" -t \"${TRUSTED_BOOT}\" ${K8S_FLAG} ${K8S_VERSION_FLAG} --version \"${VERSION}\"
 
+# Build binary
+FROM golang:1.25.1 AS builder
+WORKDIR /workdir
+COPY . .
+ENV CGO_ENABLED=0
+RUN go mod download
+RUN go build -o kairos-re-unlock ./droplet/main.go
+
+FROM base-kairos as discovery-installed
 # Install discovery
-# RUN rm -f /system/discovery/kcrypt-discovery-challenger
-# COPY --from=builder /workdir/kairos-re-unlock /system/discovery/kcrypt-discovery-re-unlock
-#
-# # Install wireguard
-# RUN apk update && \
-#     apk add wireguard-tools wireguard-tools-openrc iptables && \
-#     echo 'net.ipv4.ip_forward = 1' >> /etc/sysctl.conf && \
-#     echo 'net.ipv6.conf.all.forwarding = 1' >> /etc/sysctl.conf && \
-#     echo 'net.ipv6.conf.default.forwarding = 1' >> /etc/sysctl.conf && \
-#     ln -s /etc/init.d/wg-quick /etc/init.d/wg-quick.wg0 && \
-#     rc-update add wg-quick.wg0
-#
-# # Install other utilities
-# RUN apk add htop tcpdump
+RUN rm -f /system/discovery/kcrypt-discovery-challenger
+COPY --from=builder /workdir/kairos-re-unlock /system/discovery/kcrypt-discovery-re-unlock
+# Install wireguard
+RUN apk update && \
+    apk add wireguard-tools wireguard-tools-openrc iptables && \
+    echo 'net.ipv4.ip_forward = 1' >> /etc/sysctl.conf && \
+    echo 'net.ipv6.conf.all.forwarding = 1' >> /etc/sysctl.conf && \
+    echo 'net.ipv6.conf.default.forwarding = 1' >> /etc/sysctl.conf && \
+    ln -s /etc/init.d/wg-quick /etc/init.d/wg-quick.wg0
+
+# Install other utilities
+RUN apk add htop tcpdump
