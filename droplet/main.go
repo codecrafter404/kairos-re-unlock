@@ -10,7 +10,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-const LOGFILE = "/var/log/kairos/kcrypt-kairos-re-unlock.log"
+const LOGFILE = "/tmp/kcrypt-kairos-re-unlock.log"
 
 func main() {
 	if err := os.RemoveAll(LOGFILE); err != nil {
