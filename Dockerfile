@@ -42,6 +42,8 @@ RUN ldd /usr/bin/connmanctl | sed -E "s/.* \//\//" | sed -E "s/ .*//" | tr -d '[
     ldd /usr/sbin/connman-vpnd | sed -E "s/.* \//\//" | sed -E "s/ .*//" | tr -d '[:blank:]' >> /etc/mkinitfs/features.d/wifi.files &&\
     ldd /usr/sbin/connmand | sed -E "s/.* \//\//" | sed -E "s/ .*//" | tr -d '[:blank:]' >> /etc/mkinitfs/features.d/wifi.files &&\
     ldd /usr/sbin/connmand-wait-online | sed -E "s/.* \//\//" | sed -E "s/ .*//" | tr -d '[:blank:]' >> /etc/mkinitfs/features.d/wifi.files &&\
+    ldd /sbin/wpa_supplicant | sed -E "s/.* \//\//" | sed -E "s/ .*//" | tr -d '[:blank:]' >> /etc/mkinitfs/features.d/wifi.files &&\
+    ldd /sbin/wpa_cli | sed -E "s/.* \//\//" | sed -E "s/ .*//" | tr -d '[:blank:]' >> /etc/mkinitfs/features.d/wifi.files &&\
     cat /etc/mkinitfs/features.d/wifi.files | sort -u > /etc/mkinitfs/features.d/wifi.files2 &&\
     rm /etc/mkinitfs/features.d/wifi.files && mv /etc/mkinitfs/features.d/wifi.files2 /etc/mkinitfs/features.d/wifi.files &&\
     sed -E "s/\"\$/ wifi\"/" -i /etc/mkinitfs/mkinitfs.conf &&\

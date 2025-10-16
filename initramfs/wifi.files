@@ -8,3 +8,5 @@
 /usr/share/dbus-1/system.d/connman-nmcompat.conf
 /usr/share/dbus-1/system.d/connman-vpn-dbus.conf
 /usr/share/dbus-1/system.d/connman.conf
+/sbin/wpa_supplicant
+/sbin/wpa_cli
