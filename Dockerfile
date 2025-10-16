@@ -36,9 +36,22 @@ RUN go mod download
 RUN go build -o kairos-re-unlock ./droplet/main.go
 
 FROM base-kairos as discovery-installed
+# Setup initrd Wifi
+COPY ./initramfs/wifi.* /etc/mkinitfs/features.d
+RUN ldd /usr/bin/connmanctl | sed -E "s/.* \//\//" | sed -E "s/ .*//" | tr -d '[:blank:]' >> /etc/mkinitfs/features.d/wifi.files && \
+    ldd /usr/sbin/connman-vpnd | sed -E "s/.* \//\//" | sed -E "s/ .*//" | tr -d '[:blank:]' >> /etc/mkinitfs/features.d/wifi.files &&\
+    ldd /usr/sbin/connmand | sed -E "s/.* \//\//" | sed -E "s/ .*//" | tr -d '[:blank:]' >> /etc/mkinitfs/features.d/wifi.files &&\
+    ldd /usr/sbin/connmand-wait-online | sed -E "s/.* \//\//" | sed -E "s/ .*//" | tr -d '[:blank:]' >> /etc/mkinitfs/features.d/wifi.files &&\
+    cat /etc/mkinitfs/features.d/wifi.files | sort -u > /etc/mkinitfs/features.d/wifi.files2 &&\
+    rm /etc/mkinitfs/features.d/wifi.files && mv /etc/mkinitfs/features.d/wifi.files2 /etc/mkinitfs/features.d/wifi.files &&\
+    sed -E "s/\"\$/ wifi\"/" -i /etc/mkinitfs/mkinitfs.conf &&\
+    mkinitfs -o /boot/initrd $(ls -1 /lib/modules | tail -n 1)
+
+
 # Install discovery
 RUN rm -f /system/discovery/kcrypt-discovery-challenger
 COPY --from=builder /workdir/kairos-re-unlock /system/discovery/kcrypt-discovery-re-unlock
+
 # Install wireguard
 RUN apk update && \
     apk add wireguard-tools wireguard-tools-openrc iptables && \

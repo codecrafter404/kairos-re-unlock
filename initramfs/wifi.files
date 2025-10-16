@@ -1,0 +1,10 @@
+/etc/connman/main.conf
+/usr/bin/connmanctl
+/usr/lib/connman/scripts/vpn-script
+/usr/sbin/connman-vpnd
+/usr/sbin/connmand
+/usr/sbin/connmand-wait-online
+/usr/share/dbus-1/system-services/net.connman.vpn.service
+/usr/share/dbus-1/system.d/connman-nmcompat.conf
+/usr/share/dbus-1/system.d/connman-vpn-dbus.conf
+/usr/share/dbus-1/system.d/connman.conf
