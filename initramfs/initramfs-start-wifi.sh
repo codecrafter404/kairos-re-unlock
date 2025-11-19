@@ -1,6 +1,6 @@
 #!/bin/sh
 INTERFACE="wlan0"
-CONFIG="/oem/wpa.conf"
+CONFIG="/tmp/mnt/OEM/wpa.conf"
 CONNECT_TIMEOUT=30
 
 enable () {
@@ -39,6 +39,17 @@ enable () {
 
 }
 
+echo -n "Testing wifi config"
+
+OEM=$(kairos-agent state get oem.name)
+
+mkdir -p /tmp/mnt/OEM
+mount ${OEM} /tmp/mnt/OEM
+
 if [ -f "$CONFIG" ]; then
+	
 	enable
 fi
+
+umount /tmp/mnt/OEM
+rm -rf /tmp/mnt/OEM
