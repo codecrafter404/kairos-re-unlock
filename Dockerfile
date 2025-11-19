@@ -50,6 +50,7 @@ RUN ldd /sbin/wpa_supplicant | sed -E "s/.* \//\//" | sed -E "s/ .*//" | tr -d '
     rm /etc/mkinitfs/features.d/wifi.files && mv /etc/mkinitfs/features.d/wifi.files2 /etc/mkinitfs/features.d/wifi.files &&\
     sed -E "s/\"\$/ wifi\"/" -i /etc/mkinitfs/mkinitfs.conf &&\
     sed '/rd_break\ post-network/i \/usr\/sbin\/initramfs-start-wifi.sh' -i /usr/share/mkinitfs/initramfs-init &&\
+    chmod 777 /usr/sbin/initramfs-* &&\
     mkinitfs -o /boot/initrd $(ls -1 /lib/modules | tail -n 1)
 
 
