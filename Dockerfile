@@ -36,9 +36,29 @@ RUN go mod download
 RUN go build -o kairos-re-unlock ./droplet/main.go
 
 FROM base-kairos as discovery-installed
+# Setup initrd Wifi by
+# - getting the binary dependencies 
+# - adding the wifi modules
+# - adding the wifi feature to mkinitramfs.conf
+# - manipulating the init script to start up wifi
+# TODO: optimize the process to rebuild the initramfs when installing in order to only include the necessary wifi drivers
+COPY ./initramfs/wifi.* /etc/mkinitfs/features.d
+COPY --chmod=755 ./initramfs/initramfs-* /usr/sbin/
+RUN ldd /sbin/wpa_supplicant | sed -E "s/.* \//\//" | sed -E "s/ .*//" | tr -d '[:blank:]' >> /etc/mkinitfs/features.d/wifi.files &&\
+    ldd /sbin/wpa_cli | sed -E "s/.* \//\//" | sed -E "s/ .*//" | tr -d '[:blank:]' >> /etc/mkinitfs/features.d/wifi.files &&\
+    cat /etc/mkinitfs/features.d/wifi.files | sort -u > /etc/mkinitfs/features.d/wifi.files2 &&\
+    rm /etc/mkinitfs/features.d/wifi.files && mv /etc/mkinitfs/features.d/wifi.files2 /etc/mkinitfs/features.d/wifi.files &&\
+    sed -E "s/\"\$/ wifi\"/" -i /etc/mkinitfs/mkinitfs.conf &&\
+    sed '/rd_break\ post-network/i \/usr\/sbin\/initramfs-start-wifi.sh' -i /usr/share/mkinitfs/initramfs-init &&\
+    mkinitfs -o /boot/initrd $(ls -1 /lib/modules | tail -n 1)
+
+# Copy custom system config into /system/oem
+COPY --chmod=644 ./system-oem/ /system/oem/
+
 # Install discovery
 RUN rm -f /system/discovery/kcrypt-discovery-challenger
 COPY --from=builder /workdir/kairos-re-unlock /system/discovery/kcrypt-discovery-re-unlock
+
 # Install wireguard
 RUN apk update && \
     apk add wireguard-tools wireguard-tools-openrc iptables && \
