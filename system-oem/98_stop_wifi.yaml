@@ -1,0 +1,7 @@
+#cloud-config
+stages:
+  initramfs.before:
+    - commands:
+        - "sudo kill $(cat /run/initram-wpa_supplicant.pid)"
+        - rm /run/initram-wpa_supplicant.pid
+      if: "cat /run/initram-wpa_supplicant.pid"

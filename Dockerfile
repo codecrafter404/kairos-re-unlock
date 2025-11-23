@@ -52,6 +52,8 @@ RUN ldd /sbin/wpa_supplicant | sed -E "s/.* \//\//" | sed -E "s/ .*//" | tr -d '
     sed '/rd_break\ post-network/i \/usr\/sbin\/initramfs-start-wifi.sh' -i /usr/share/mkinitfs/initramfs-init &&\
     mkinitfs -o /boot/initrd $(ls -1 /lib/modules | tail -n 1)
 
+# Copy custom system config into /system/oem
+COPY --chmod=644 ./system-oem/ /system/oem/
 
 # Install discovery
 RUN rm -f /system/discovery/kcrypt-discovery-challenger
