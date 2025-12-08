@@ -55,3 +55,36 @@ jobs:
             # Kairos update text
             ${{steps.latest_msg.outputs.stdout}}
           delete-branch: true
+  update-kubernetes:
+    runs-on: ubuntu-24-04
+    steps:
+      - uses: action/checkout@v4
+      - name: Get latest
+        id: latest
+        run: |
+          echo "stdout=$(curl -s https://api.github.com/repos/k3s-io/k3s/releases/latest | yq -r .tag_name)" >> $GITHUB_OUTPUT
+      - name: Get latest
+        id: latest_msg
+        run: |
+          {
+            echo 'stdout<<EOF'
+            curl -s https://api.github.com/repos/k3s-io/k3s/releases/latest | yq -r .body
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+      - name: Replace Version
+        run: |
+          yq -i '.env.KUBERNETES_VERSION = "${{steps.latest.outputs.stdout}}"' ./.github/workflows/build-and-release.yaml
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{secrets.PULLREQUST_TOKEN}}
+          commit-message: Update to k3s ${{steps.latest.outputs.stdout}}
+          branch: update-kairos
+          title: Update k3s to ${{steps.latest.outputs.stdout}}
+          body: |
+            # General
+            Update k3s version to `${{steps.latest.outputs.stdout}}`
+            # k3s update text
+            ${{steps.latest_msg.outputs.stdout}}
+          delete-branch: true
+
