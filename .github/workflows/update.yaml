@@ -7,10 +7,6 @@ jobs:
   download-upstream:
     runs-on: ubuntu-24.04
     steps:
-      # - name: Install Tools
-      #   run: |
-      #     sudo apt update && sudo apt upgrade -y
-      #     sudo apt install yq
       - uses: actions/checkout@v4
       - name: Get latest
         id: latest
@@ -35,7 +31,7 @@ jobs:
       - name: Fetch Dockerfile & update resulting Dockerfile
         run: |
           curl -s https://raw.githubusercontent.com/kairos-io/kairos/refs/tags/${{steps.latest.outputs.stdout}}/images/Dockerfile > Dockerfile_kairos
-          touch /Dockerfile
+          touch Dockerfile
           echo "# DO NOT EDIT MANUALLY - THIS FILE IS AUTO-GENERATED" >> Dockerfile
           cat Dockerfile_kairos >> Dockerfile
           cat Dockerfile_ext >> Dockerfile
