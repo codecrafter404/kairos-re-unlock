@@ -5,16 +5,15 @@ on:
       - main
   workflow_dispatch:
 permissions:
-  id-token: write  # OIDC support
+  id-token: write # OIDC support
   contents: write
   actions: read
   packages: write
   security-events: write
   models: none
 env:
-  KUBERNETES_VERSION: "v1.34.1+k3s1"
+  KUBERNETES_VERSION: "v1.34.2+k3s1"
   BASE_IMAGE: "alpine:3.21.5"
-    
 jobs:
   setup-version:
     runs-on: ubuntu-24.04
@@ -59,7 +58,6 @@ jobs:
       registry_repository: alpine-reunlock-$ARCH-$MODEL
       custom_tag_format: $VERSION
       image_labels: "org.opencontainers.image.source=https://github.com/codecrafter404/kairos-re-unlock"
-      
   build-rpi:
     needs: setup-version
     uses: ./.github/workflows/factory.yaml
@@ -100,7 +98,6 @@ jobs:
                   unzip -o "$zipfile" -d /tmp/artifacts/
               fi
           done
-
       - run: |
           arts=$(python3 -c 'import os
           res = []
