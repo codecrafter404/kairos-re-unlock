@@ -12,8 +12,8 @@ permissions:
   security-events: write
   models: none
 env:
+  BASE_IMAGE: "alpine:3.21"
   KUBERNETES_VERSION: "v1.34.2+k3s1"
-  BASE_IMAGE: "alpine:3.21.5"
 jobs:
   setup-version:
     runs-on: ubuntu-24.04
@@ -37,7 +37,7 @@ jobs:
           echo "base_image=${{ env.BASE_IMAGE }}" >> "$GITHUB_OUTPUT"
   build-amd64:
     needs: setup-version
-    uses: ./.github/workflows/factory.yaml
+    uses: kairos-io/kairos-factory-action/.github/workflows/reusable-factory.yaml@71d85fe9d4267e373a5d27b4a0fddd44628fb1ba
     secrets:
       registry_username: codecrafter404
       registry_password: ${{ secrets.GITHUB_TOKEN }}
@@ -60,7 +60,7 @@ jobs:
       image_labels: "org.opencontainers.image.source=https://github.com/codecrafter404/kairos-re-unlock"
   build-rpi:
     needs: setup-version
-    uses: ./.github/workflows/factory.yaml
+    uses: kairos-io/kairos-factory-action/.github/workflows/reusable-factory.yaml@71d85fe9d4267e373a5d27b4a0fddd44628fb1ba
     secrets:
       registry_username: codecrafter404
       registry_password: ${{ secrets.GITHUB_TOKEN }}
