@@ -36,6 +36,11 @@ jobs:
         run: |
           echo "kubernetes_version=${{ env.KUBERNETES_VERSION }}" >> "$GITHUB_OUTPUT"
           echo "base_image=${{ env.BASE_IMAGE }}" >> "$GITHUB_OUTPUT"
+      - name: Generate Dockerfile
+        run: |
+          touch Dockerfile
+          cat ./Dockerfile_kairos >> Dockerfile
+          cat ./Dockerfile_ext >> Dockerfile
   build-amd64:
     needs: setup-version
     uses: ./.github/workflows/factory.yaml
