@@ -40,7 +40,7 @@ jobs:
     uses: kairos-io/kairos-factory-action/.github/workflows/reusable-factory.yaml@71d85fe9d4267e373a5d27b4a0fddd44628fb1ba
     secrets:
       registry_username: codecrafter404
-      registry_password: ${{ secrets.GITHUB_TOKEN }}
+      registry_password: ${{ secrets.PACKAGE }}
     with:
       version: "auto"
       base_image: ${{ needs.setup-version.outputs.base_image }}
@@ -63,7 +63,7 @@ jobs:
     uses: kairos-io/kairos-factory-action/.github/workflows/reusable-factory.yaml@71d85fe9d4267e373a5d27b4a0fddd44628fb1ba
     secrets:
       registry_username: codecrafter404
-      registry_password: ${{ secrets.GITHUB_TOKEN }}
+      registry_password: ${{ secrets.PACKAGE }}
     with:
       version: "auto"
       base_image: ${{ needs.setup-version.outputs.base_image }}
