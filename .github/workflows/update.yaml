@@ -1,8 +1,4 @@
 name: Update Dependencies
-permissions:
-  actions: write
-  contents: write
-  pull-requests: write
 on:
   schedule:
     - cron: 0 04 * * *
@@ -19,19 +15,23 @@ jobs:
       - name: Get latest
         id: latest
         run: |
-          curl -s https://api.github.com/repos/kairos-io/kairos/releases/latest | yq -r .tag_name
+          echo "stdout=$(curl -s https://api.github.com/repos/kairos-io/kairos/releases/latest | yq -r .tag_name)" >> $GITHUB_OUTPUT
       - name: Get latest
         id: latest_msg
         run: |
-          curl -s https://api.github.com/repos/kairos-io/kairos/releases/latest | yq -r .body
+          {
+            echo 'stdout<<EOF'
+            curl -s https://api.github.com/repos/kairos-io/kairos/releases/latest | yq -r .body
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
       - name: Fetch used Kairos Workflow
         id: workflow
         run: |
-          curl -s https://raw.githubusercontent.com/kairos-io/kairos/refs/tags/${{steps.latest.outputs.stdout}}/.github/workflows/image-master.yaml | yq -r .jobs.standard.uses
+          echo "stdout=$(curl -s https://raw.githubusercontent.com/kairos-io/kairos/refs/tags/${{steps.latest.outputs.stdout}}/.github/workflows/image-master.yaml | yq -r .jobs.standard.uses)" >> $GITHUB_OUTPUT
       - name: Fetch Alpine Version
         id: alpine
         run: |
-          curl -s https://raw.githubusercontent.com/kairos-io/kairos/refs/tags/${{steps.latest.outputs.stdout}}/.github/workflows/image-master.yaml | yq '.jobs.standard.strategy.matrix.base_image[] | select(. == "alpine*")'
+          echo "stdout=$(curl -s https://raw.githubusercontent.com/kairos-io/kairos/refs/tags/${{steps.latest.outputs.stdout}}/.github/workflows/image-master.yaml | yq '.jobs.standard.strategy.matrix.base_image[] | select(. == "alpine*")')" >> $GITHUB_OUTPUT
       - name: Fetch Dockerfile
         run: |
           curl -s https://raw.githubusercontent.com/kairos-io/kairos/refs/tags/${{steps.latest.outputs.stdout}}/images/Dockerfile > Dockerfile_kairos
@@ -43,6 +43,7 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
         with:
+          token: ${{secrets.PULLREQUST_TOKEN}}
           commit-message: Update to kairos ${{steps.latest.outputs.stdout}}
           branch: update-kairos
           title: Update Kairos to ${{steps.latest.outputs.stdout}}
