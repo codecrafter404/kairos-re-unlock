@@ -38,6 +38,13 @@ jobs:
   build-amd64:
     needs: setup-version
     uses: kairos-io/kairos-factory-action/.github/workflows/reusable-factory.yaml@71d85fe9d4267e373a5d27b4a0fddd44628fb1ba
+    permissions:
+      id-token: write # OIDC support
+      contents: write
+      actions: read
+      packages: write
+      security-events: write
+      models: none
     secrets:
       registry_username: codecrafter404
       registry_password: ${{ secrets.GITHUB_TOKEN }}
@@ -61,6 +68,13 @@ jobs:
   build-rpi:
     needs: setup-version
     uses: kairos-io/kairos-factory-action/.github/workflows/reusable-factory.yaml@71d85fe9d4267e373a5d27b4a0fddd44628fb1ba
+    permissions:
+      id-token: write # OIDC support
+      contents: write
+      actions: read
+      packages: write
+      security-events: write
+      models: none
     secrets:
       registry_username: codecrafter404
       registry_password: ${{ secrets.GITHUB_TOKEN }}
