@@ -79,7 +79,7 @@ jobs:
         with:
           token: ${{secrets.PULLREQUST_TOKEN}}
           commit-message: Update to k3s ${{steps.latest.outputs.stdout}}
-          branch: update-kairos
+          branch: update-k3s
           title: Update k3s to ${{steps.latest.outputs.stdout}}
           body: |
             # General
