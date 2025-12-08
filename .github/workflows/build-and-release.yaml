@@ -12,8 +12,8 @@ permissions:
   security-events: write
   models: none
 env:
-  KUBERNETES_VERSION: "v1.34.1+k3s1"
   BASE_IMAGE: "alpine:3.21"
+  KUBERNETES_VERSION: "v1.34.2+k3s1"
 jobs:
   setup-version:
     runs-on: ubuntu-24.04
