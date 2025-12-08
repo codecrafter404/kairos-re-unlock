@@ -32,9 +32,13 @@ jobs:
         id: alpine
         run: |
           echo "stdout=$(curl -s https://raw.githubusercontent.com/kairos-io/kairos/refs/tags/${{steps.latest.outputs.stdout}}/.github/workflows/image-master.yaml | yq '.jobs.standard.strategy.matrix.base_image[] | select(. == "alpine*")')" >> $GITHUB_OUTPUT
-      - name: Fetch Dockerfile
+      - name: Fetch Dockerfile & update resulting Dockerfile
         run: |
           curl -s https://raw.githubusercontent.com/kairos-io/kairos/refs/tags/${{steps.latest.outputs.stdout}}/images/Dockerfile > Dockerfile_kairos
+          touch /Dockerfile
+          echo "# DO NOT EDIT MANUALLY - THIS FILE IS AUTO-GENERATED" >> Dockerfile
+          cat Dockerfile_kairos >> Dockerfile
+          cat Dockerfile_ext >> Dockerfile
       - name: Update workflow
         run: |
           yq -i '.jobs.build-amd64.uses = "${{steps.workflow.outputs.stdout}}"' ./.github/workflows/build-and-release.yaml
