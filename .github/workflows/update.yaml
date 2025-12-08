@@ -58,7 +58,7 @@ jobs:
   update-kubernetes:
     runs-on: ubuntu-24.04
     steps:
-      - uses: action/checkout@v4
+      - uses: actions/checkout@v4
       - name: Get latest
         id: latest
         run: |
