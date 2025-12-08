@@ -1,0 +1,55 @@
+name: Update Dependencies
+permissions:
+  contents: write
+  pull-requests: write
+on:
+  schedule:
+    - cron: 0 04 * * *
+  workflow_dispatch:
+jobs:
+  download-upstream:
+    runs-on: ubuntu-24.04
+    steps:
+      # - name: Install Tools
+      #   run: |
+      #     sudo apt update && sudo apt upgrade -y
+      #     sudo apt install yq
+      - uses: actions/checkout@v4
+      - name: Get latest
+        id: latest
+        run: |
+          curl -s https://api.github.com/repos/kairos-io/kairos/releases/latest | yq -r .tag_name
+      - name: Get latest
+        id: latest_msg
+        run: |
+          curl -s https://api.github.com/repos/kairos-io/kairos/releases/latest | yq -r .body
+      - name: Fetch used Kairos Workflow
+        id: workflow
+        run: |
+          curl -s https://raw.githubusercontent.com/kairos-io/kairos/refs/tags/${{steps.latest.outputs.stdout}}/.github/workflows/image-master.yaml | yq -r .jobs.standard.uses
+      - name: Fetch Alpine Version
+        id: alpine
+        run: |
+          curl -s https://raw.githubusercontent.com/kairos-io/kairos/refs/tags/${{steps.latest.outputs.stdout}}/.github/workflows/image-master.yaml | yq '.jobs.standard.strategy.matrix.base_image[] | select(. == "alpine*")'
+      - name: Fetch Dockerfile
+        run: |
+          curl -s https://raw.githubusercontent.com/kairos-io/kairos/refs/tags/${{steps.latest.outputs.stdout}}/images/Dockerfile > Dockerfile_kairos
+      - name: Update workflow
+        run: |
+          yq -i '.jobs.build-amd64.uses = "${{steps.workflow.outputs.stdout}}"' ./.github/workflows/build-and-release.yaml
+          yq -i '.jobs.build-rpi.uses = "${{steps.workflow.outputs.stdout}}"' ./.github/workflows/build-and-release.yaml
+          yq -i '.env.BASE_IMAGE = "${{steps.alpine.outputs.stdout}}"' ./.github/workflows/build-and-release.yaml
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: Update to kairos ${{steps.latest.outputs.stdout}}
+          branch: update-kairos
+          title: Update Kairos to ${{steps.latest.outputs.stdout}}
+          body: |
+            # General
+            - Alpine Version: `${{steps.alpine.outputs.stdout}}`
+            - Kairos Version: `${{steps.latest.outputs.stdout}}`
+            - Kairos Workflow: `${{steps.workflow.outputs.stdout}}`
+            # Kairos update text
+            ${{steps.latest_msg.outputs.stdout}}
+          delete-branch: true
