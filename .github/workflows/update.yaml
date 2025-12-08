@@ -1,5 +1,6 @@
 name: Update Dependencies
 permissions:
+  actions: write
   contents: write
   pull-requests: write
 on:
