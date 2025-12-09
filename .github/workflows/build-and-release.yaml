@@ -37,7 +37,7 @@ jobs:
           echo "base_image=${{ env.BASE_IMAGE }}" >> "$GITHUB_OUTPUT"
   build-amd64:
     needs: setup-version
-    uses: kairos-io/kairos-factory-action/.github/workflows/reusable-factory.yaml@71d85fe9d4267e373a5d27b4a0fddd44628fb1ba
+    uses: "null"
     secrets:
       registry_username: codecrafter404
       registry_password: ${{ secrets.PACKAGE }}
@@ -60,7 +60,7 @@ jobs:
       image_labels: "org.opencontainers.image.source=https://github.com/codecrafter404/kairos-re-unlock"
   build-rpi:
     needs: setup-version
-    uses: kairos-io/kairos-factory-action/.github/workflows/reusable-factory.yaml@71d85fe9d4267e373a5d27b4a0fddd44628fb1ba
+    uses: "null"
     secrets:
       registry_username: codecrafter404
       registry_password: ${{ secrets.PACKAGE }}
