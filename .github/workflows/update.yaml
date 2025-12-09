@@ -11,26 +11,26 @@ jobs:
       - name: Get latest
         id: latest
         run: |
-          echo "stdout=$(curl -s https://api.github.com/repos/kairos-io/kairos/releases/latest | yq -r .tag_name)" >> $GITHUB_OUTPUT
+          echo "stdout=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/kairos-io/kairos/releases/latest | yq -r .tag_name)" >> $GITHUB_OUTPUT
       - name: Get latest
         id: latest_msg
         run: |
           {
             echo 'stdout<<EOF'
-            curl -s https://api.github.com/repos/kairos-io/kairos/releases/latest | yq -r .body
+            curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/kairos-io/kairos/releases/latest | yq -r .body
             echo EOF
           } >> "$GITHUB_OUTPUT"
       - name: Fetch used Kairos Workflow
         id: workflow
         run: |
-          echo "stdout=$(curl -s https://raw.githubusercontent.com/kairos-io/kairos/refs/tags/${{steps.latest.outputs.stdout}}/.github/workflows/image-master.yaml | yq -r .jobs.standard.uses)" >> $GITHUB_OUTPUT
+          echo "stdout=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://raw.githubusercontent.com/kairos-io/kairos/refs/tags/${{steps.latest.outputs.stdout}}/.github/workflows/image-master.yaml | yq -r .jobs.standard.uses)" >> $GITHUB_OUTPUT
       - name: Fetch Alpine Version
         id: alpine
         run: |
-          echo "stdout=$(curl -s https://raw.githubusercontent.com/kairos-io/kairos/refs/tags/${{steps.latest.outputs.stdout}}/.github/workflows/image-master.yaml | yq '.jobs.standard.strategy.matrix.base_image[] | select(. == "alpine*")')" >> $GITHUB_OUTPUT
+          echo "stdout=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://raw.githubusercontent.com/kairos-io/kairos/refs/tags/${{steps.latest.outputs.stdout}}/.github/workflows/image-master.yaml | yq '.jobs.standard.strategy.matrix.base_image[] | select(. == "alpine*")')" >> $GITHUB_OUTPUT
       - name: Fetch Dockerfile & update resulting Dockerfile
         run: |
-          curl -s https://raw.githubusercontent.com/kairos-io/kairos/refs/tags/${{steps.latest.outputs.stdout}}/images/Dockerfile > Dockerfile_kairos
+          curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://raw.githubusercontent.com/kairos-io/kairos/refs/tags/${{steps.latest.outputs.stdout}}/images/Dockerfile > Dockerfile_kairos
           touch Dockerfile
           echo "# DO NOT EDIT MANUALLY - THIS FILE IS AUTO-GENERATED" > Dockerfile
           cat Dockerfile_kairos >> Dockerfile
@@ -62,13 +62,13 @@ jobs:
       - name: Get latest
         id: latest
         run: |
-          echo "stdout=$(curl -s https://api.github.com/repos/k3s-io/k3s/releases/latest | yq -r .tag_name)" >> $GITHUB_OUTPUT
+          echo "stdout=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/k3s-io/k3s/releases/latest | yq -r .tag_name)" >> $GITHUB_OUTPUT
       - name: Get latest
         id: latest_msg
         run: |
           {
             echo 'stdout<<EOF'
-            curl -s https://api.github.com/repos/k3s-io/k3s/releases/latest | yq -r .body
+            curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/k3s-io/k3s/releases/latest | yq -r .body
             echo EOF
           } >> "$GITHUB_OUTPUT"
       - name: Replace Version
