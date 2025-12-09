@@ -32,7 +32,7 @@ jobs:
         run: |
           curl -s https://raw.githubusercontent.com/kairos-io/kairos/refs/tags/${{steps.latest.outputs.stdout}}/images/Dockerfile > Dockerfile_kairos
           touch Dockerfile
-          echo "# DO NOT EDIT MANUALLY - THIS FILE IS AUTO-GENERATED" >> Dockerfile
+          echo "# DO NOT EDIT MANUALLY - THIS FILE IS AUTO-GENERATED" > Dockerfile
           cat Dockerfile_kairos >> Dockerfile
           cat Dockerfile_ext >> Dockerfile
       - name: Update workflow
