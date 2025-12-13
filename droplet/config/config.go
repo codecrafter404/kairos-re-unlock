@@ -1,4 +1,4 @@
-package droplet
+package config
 
 import (
 	"fmt"

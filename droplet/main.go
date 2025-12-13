@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/codecrafter404/kairos-re-unlock/droplet/config"
 	"github.com/codecrafter404/kairos-re-unlock/droplet/droplet"
 	"github.com/kairos-io/kcrypt/pkg/bus"
 	"github.com/rs/zerolog"
@@ -33,7 +34,7 @@ func main() {
 
 	log.Info().Msg("Start")
 
-	config, err := droplet.UnmarshalConfig()
+	config, err := config.UnmarshalConfig()
 	checkErr(err)
 
 	if len(os.Args) >= 2 && bus.IsEventDefined(os.Args[1]) {

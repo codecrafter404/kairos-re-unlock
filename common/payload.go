@@ -8,6 +8,9 @@ import (
 	"encoding/base64"
 	"fmt"
 	"time"
+
+	"github.com/codecrafter404/kairos-re-unlock/droplet/config"
+	"github.com/rs/zerolog/log"
 )
 
 type Payload struct {
@@ -71,6 +74,42 @@ func (r *Payload) signPayload(privateKey string) error {
 	}
 	r.Signature = base64.StdEncoding.EncodeToString(signature)
 	return nil
+}
+
+func (payload *Payload) Valid(config config.Config) error {
+	// check signature
+	err := payload.IsValidSignature(config.PublicKey)
+
+	if err != nil {
+		log.Err(err).Msg("Signature verification failed")
+		return err
+	}
+
+	// check timestamp
+	now := time.Now().Unix()
+	var gracePeriod int64 = 60 * 15
+
+	if payload.Timestamp < (now-gracePeriod) || payload.Timestamp > now {
+		err = fmt.Errorf("Invalid timestamp")
+		log.Err(err).Int64("grace", gracePeriod).Int64("now", now).Msg("Invalid timestamp")
+		return err
+	}
+	return nil
+}
+
+func (payload *Payload) GetPassword(config config.Config) (string, error) {
+	if err := payload.Valid(config); err != nil {
+		return "", err
+	}
+
+	// decrypt payload
+	password, err := payload.DecryptPassword(config.PrivateKey)
+	if err != nil {
+		log.Err(err).Msg("Decryption failed")
+		return "", nil
+	}
+
+	return password, nil
 }
 
 func withPassword(pemPublicKey string, password string) (Payload, error) {
