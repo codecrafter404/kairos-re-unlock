@@ -16,6 +16,11 @@ func getAsyncHttpsResponse(config config.Config, channel chan<- pluggable.EventR
 	})
 
 	http.HandleFunc("/unlock", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
 		var passwd common.Payload
 
 		decoder := json.NewDecoder(r.Body)
