@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/codecrafter404/kairos-re-unlock/common"
 	"github.com/codecrafter404/kairos-re-unlock/droplet/config"
 	"github.com/codecrafter404/kairos-re-unlock/droplet/droplet"
 	"github.com/kairos-io/kcrypt/pkg/bus"
@@ -45,6 +46,7 @@ func main() {
 	fmt.Printf("EdgeVPN Token: %s\n", config.EdgeVPNToken)
 	fmt.Printf("EdgeVPN PrivateKey: %s\n", config.PrivateKey)
 	fmt.Printf("EdgeVPN PublicKey: %s\n", config.PublicKey)
+	fmt.Printf("Version: %s\n", common.GetVersionInformation())
 
 }
 
