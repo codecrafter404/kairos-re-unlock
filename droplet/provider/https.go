@@ -11,7 +11,6 @@ import (
 
 	"github.com/codecrafter404/kairos-re-unlock/common"
 	"github.com/codecrafter404/kairos-re-unlock/droplet/config"
-	"github.com/codecrafter404/kairos-re-unlock/droplet/droplet"
 	"github.com/mudler/go-pluggable"
 	"github.com/rs/zerolog/log"
 )
