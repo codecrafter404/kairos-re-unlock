@@ -15,7 +15,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"strings"
 
 	"github.com/codecrafter404/kairos-re-unlock/common"
 	"github.com/rs/zerolog/log"
