@@ -5,9 +5,12 @@ package cmd
 
 import (
 	"crypto"
+	"crypto/aes"
+	"crypto/cipher"
 	"crypto/rand"
 	"crypto/rsa"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -57,21 +60,40 @@ var logsCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to read privateKey")
 		}
+		//
+		var logsPayload common.LogsPayload
+		err = json.Unmarshal(resp_bytes, &logsPayload)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to unmarshall logs")
+		}
 
 		privKey, err := common.ParsePrivateKey(string(privateKey))
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to parse private key")
 		}
-		decodedPassword, err := base64.StdEncoding.DecodeString(string(resp_bytes))
+		decodedPassword, err := base64.StdEncoding.DecodeString(logsPayload.Key)
 		if err != nil {
 			log.Fatal().Err(err).Str("base64", string(resp_bytes)).Msg("Failed to decode password")
 		}
-
-		data, err := rsa.DecryptOAEP(crypto.SHA512.New(), rand.Reader, &privKey, decodedPassword, nil)
+		aesKey, err := rsa.DecryptOAEP(crypto.SHA512.New(), rand.Reader, &privKey, decodedPassword, nil)
 		if err != nil {
 			log.Fatal().Err(err).Msg("OAEP decryption failed")
 		}
-		fmt.Println(string(data))
+
+		block, err := aes.NewCipher(aesKey)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to create new cipher")
+		}
+		aesGCM, err := cipher.NewGCM(block)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to create new gcm")
+		}
+		nonce, err := base64.RawStdEncoding.DecodeString(logsPayload.Nonce)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to decode ")
+		}
+
+		// fmt.Println(string(data))
 
 	},
 }

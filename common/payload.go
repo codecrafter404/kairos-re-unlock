@@ -13,6 +13,12 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+type LogsPayload struct {
+	Nonce string
+	Data  string
+	Key   string
+}
+
 type Payload struct {
 	EncyptedPassword string
 	Timestamp        int64
