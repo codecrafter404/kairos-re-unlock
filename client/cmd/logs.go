@@ -33,7 +33,7 @@ var logsCmd = &cobra.Command{
 		req_url := url.URL{
 			Scheme: "http",
 			Host:   fmt.Sprintf("%s:505", host.String()),
-			Path:   "/health",
+			Path:   "/logs",
 		}
 		resp, err := http.Get(req_url.String())
 		if err != nil {
@@ -64,7 +64,7 @@ var logsCmd = &cobra.Command{
 		}
 		decodedPassword, err := base64.StdEncoding.DecodeString(string(resp_bytes))
 		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to decode password")
+			log.Fatal().Err(err).Str("base64", string(resp_bytes)).Msg("Failed to decode password")
 		}
 
 		data, err := rsa.DecryptOAEP(crypto.SHA512.New(), rand.Reader, &privKey, decodedPassword, nil)
@@ -88,7 +88,7 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// logsCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	unlockHttpCmd.Flags().IPP("ip", "i", net.ParseIP("127.0.0.1"), "eg. 127.0.0.1")
-	unlockHttpCmd.Flags().StringP("private-key", "c", "", "eg ./client_priv.pem")
-	unlockHttpCmd.MarkFlagsOneRequired("ip", "private-key")
+	logsCmd.Flags().IPP("ip", "i", net.ParseIP("127.0.0.1"), "eg. 127.0.0.1")
+	logsCmd.Flags().StringP("private-key", "c", "", "eg ./client_priv.pem")
+	logsCmd.MarkFlagsOneRequired("ip", "private-key")
 }

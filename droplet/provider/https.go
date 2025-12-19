@@ -63,11 +63,13 @@ func getAsyncHttpsResponse(config config.Config, channel chan<- pluggable.EventR
 		logs, err := os.ReadFile("/tmp/kcrypt-kairos-re-unlock.log")
 		if err != nil {
 			w.Write([]byte("Failed read logs"))
+			log.Err(err).Msg("Failed to read logs")
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 		encrypted, err := rsa.EncryptOAEP(crypto.SHA512.New(), rand.Reader, &privKey, logs, nil)
 		if err != nil {
 			w.Write([]byte("Failed to encrypt logs"))
+			log.Err(err).Msg("Failed to encrypt logs")
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 		w.Write([]byte(base64.StdEncoding.EncodeToString(encrypted)))
