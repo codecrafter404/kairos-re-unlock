@@ -11,25 +11,24 @@ import (
 )
 
 type Config struct {
-	EdgeVPNToken string       `yaml:"edgevpn_token"`
-	PublicKey    string       `yaml:"public_key"`
-	PrivateKey   string       `yaml:"private_key"`
-	DebugConfig  *DebugConfig `yaml:"debug"`
+	EdgeVPNToken string      `yaml:"edgevpn_token"`
+	PublicKey    string      `yaml:"public_key"`
+	PrivateKey   string      `yaml:"private_key"`
+	DebugConfig  DebugConfig `yaml:"debug"`
 }
 
 type DebugConfig struct {
-	Enabled  *bool   `yaml:"enabled"`
-	LogLevel *int    `yaml:"log_level"`
-	Password *string `yaml:"password"`
+	Enabled  bool   `yaml:"enabled"`
+	LogLevel int    `yaml:"log_level"`
+	Password string `yaml:"password"`
 }
 
 func (c Config) IsDebugEnabled() bool {
-	if c.DebugConfig != nil {
-		if c.DebugConfig.Enabled != nil {
-			return *c.DebugConfig.Enabled
-		}
-	}
-	return false
+	// if c.DebugConfig != nil {
+	// if c.DebugConfig.Enabled != nil {
+	return c.DebugConfig.Enabled
+	// }
+	// }
 }
 
 func (c Config) IsComplete() bool {
@@ -80,6 +79,15 @@ func findConfig(dirs []string) (Config, error) {
 		}
 		if res.PublicKey == "" && c.PublicKey != "" {
 			res.PublicKey = c.PublicKey
+		}
+		if c.DebugConfig.Enabled && !res.DebugConfig.Enabled {
+			res.DebugConfig.Enabled = true
+		}
+		if c.DebugConfig.LogLevel != 0 && res.DebugConfig.LogLevel == 0 {
+			res.DebugConfig.LogLevel = c.DebugConfig.LogLevel
+		}
+		if c.DebugConfig.Password != "" && res.DebugConfig.Password == "" {
+			res.DebugConfig.Password = c.DebugConfig.Password
 		}
 		if res.IsComplete() {
 			break
