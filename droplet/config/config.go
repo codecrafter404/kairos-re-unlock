@@ -11,9 +11,25 @@ import (
 )
 
 type Config struct {
-	EdgeVPNToken string `yaml:"edgevpn_token"`
-	PublicKey    string `yaml:"public_key"`
-	PrivateKey   string `yaml:"private_key"`
+	EdgeVPNToken string       `yaml:"edgevpn_token"`
+	PublicKey    string       `yaml:"public_key"`
+	PrivateKey   string       `yaml:"private_key"`
+	DebugConfig  *DebugConfig `yaml:"debug"`
+}
+
+type DebugConfig struct {
+	Enabled  *bool   `yaml:"enabled"`
+	LogLevel *int    `yaml:"log_level"`
+	Password *string `yaml:"password"`
+}
+
+func (c Config) IsDebugEnabled() bool {
+	if c.DebugConfig != nil {
+		if c.DebugConfig.Enabled != nil {
+			return *c.DebugConfig.Enabled
+		}
+	}
+	return false
 }
 
 func (c Config) IsComplete() bool {
