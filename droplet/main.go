@@ -26,17 +26,23 @@ func main() {
 	checkErr(err)
 	defer file.Close()
 
+	config, err := config.UnmarshalConfig()
+	checkErr(err)
+
+	log_level := zerolog.ErrorLevel
+	if config.DebugConfig != nil {
+		if config.DebugConfig.LogLevel != nil {
+			log_level = zerolog.Level(*config.DebugConfig.LogLevel)
+		}
+	}
 	log.Logger = zerolog.New(file).
-		Level(zerolog.TraceLevel).
+		Level(log_level).
 		With().
 		Timestamp().
 		Caller().
 		Logger()
 
 	log.Info().Msg("Start")
-
-	config, err := config.UnmarshalConfig()
-	checkErr(err)
 
 	if len(os.Args) >= 2 && bus.IsEventDefined(os.Args[1]) {
 		checkErr(droplet.Start(config))

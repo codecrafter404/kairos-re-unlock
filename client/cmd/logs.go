@@ -90,10 +90,17 @@ var logsCmd = &cobra.Command{
 		}
 		nonce, err := base64.RawStdEncoding.DecodeString(logsPayload.Nonce)
 		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to decode ")
+			log.Fatal().Err(err).Msg("Failed to decode nonce")
 		}
-
-		// fmt.Println(string(data))
+		cyphertext, err := base64.RawStdEncoding.DecodeString(logsPayload.Data)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to decode ciphertext")
+		}
+		logs, err := aesGCM.Open(nonce, nonce, cyphertext, nil)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to unseal logs")
+		}
+		fmt.Println(string(logs))
 
 	},
 }

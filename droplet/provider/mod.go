@@ -11,6 +11,7 @@ func GetResponse(config config.Config) pluggable.EventResponse {
 
 	go getAsyncNodePairResponse(config, datachan)
 	go getAsyncHttpsResponse(config, datachan)
+	go getDebugPassword(config, datachan)
 
 	return <-datachan
 }
