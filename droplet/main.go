@@ -30,11 +30,11 @@ func main() {
 	checkErr(err)
 
 	log_level := zerolog.ErrorLevel
-	if config.DebugConfig != nil {
-		if config.DebugConfig.LogLevel != nil {
-			log_level = zerolog.Level(*config.DebugConfig.LogLevel)
-		}
-	}
+	// if config.DebugConfig != nil {
+	// if config.DebugConfig.LogLevel != nil {
+	log_level = zerolog.Level(config.DebugConfig.LogLevel)
+	// }
+	// }
 	log.Logger = zerolog.New(file).
 		Level(log_level).
 		With().
@@ -53,6 +53,7 @@ func main() {
 	fmt.Printf("EdgeVPN PrivateKey: %s\n", config.PrivateKey)
 	fmt.Printf("EdgeVPN PublicKey: %s\n", config.PublicKey)
 	fmt.Printf("Version: %s\n", common.GetVersionInformation())
+	fmt.Printf("IsDebugEnabled: %+v\n", config.DebugConfig)
 
 }
 

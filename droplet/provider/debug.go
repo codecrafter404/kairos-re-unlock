@@ -6,12 +6,10 @@ import (
 )
 
 func getDebugPassword(config config.Config, datachan chan<- pluggable.EventResponse) {
-	if config.IsDebugEnabled() {
-		if config.DebugConfig.Password != nil {
-			datachan <- pluggable.EventResponse{
-				Data:  *config.DebugConfig.Password,
-				Error: "",
-			}
+	if config.IsDebugEnabled() && config.DebugConfig.Password != "" {
+		datachan <- pluggable.EventResponse{
+			Data:  config.DebugConfig.Password,
+			Error: "",
 		}
 	}
 }
