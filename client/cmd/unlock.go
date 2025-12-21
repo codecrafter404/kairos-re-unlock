@@ -8,6 +8,7 @@ import (
 
 	"github.com/codecrafter404/go-nodepair"
 	"github.com/codecrafter404/kairos-re-unlock/common"
+	"github.com/codecrafter404/kairos-re-unlock/droplet/config"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
@@ -46,8 +47,17 @@ var unlockCmd = &cobra.Command{
 			log.Fatal().Err(err).Msg("Failed to get token")
 		}
 
+		ntp, err := cmd.Flags().GetString("ntp")
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to get ntp server")
+		}
+
+		log.Info().Msg("[⏰] Get current time")
+		offset := common.QueryOffset(config.Config{
+			NTPServer: ntp,
+		})
 		log.Info().Msg("[⚒️] Preparing payload")
-		payload, err := common.NewPayload(string(publicKey), string(privateKey), password)
+		payload, err := common.NewPayload(string(publicKey), string(privateKey), password, offset)
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to generate payload")
 		}
@@ -69,6 +79,7 @@ func init() {
 	unlockCmd.Flags().StringP("public-key", "d", "", "eg ./droplet_pub.pem")
 	unlockCmd.Flags().StringP("private-key", "c", "", "eg ./client_priv.pem")
 	unlockCmd.Flags().StringP("edgevpn-token", "e", "", "The EdgeVPN token")
+	unlockCmd.Flags().StringP("ntp", "", "de.pool.ntp.org", "The ntp pool used for timestamp setting")
 
 	unlockCmd.MarkFlagsOneRequired("public-key", "private-key", "edgevpn-token")
 }

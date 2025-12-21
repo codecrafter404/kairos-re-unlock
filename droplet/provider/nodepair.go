@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"time"
 
 	"github.com/codecrafter404/go-nodepair"
 	"github.com/codecrafter404/kairos-re-unlock/common"
@@ -10,8 +11,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func getAsyncNodePairResponse(config config.Config, channel chan<- pluggable.EventResponse) {
-	res, err := getResponse(config)
+func getAsyncNodePairResponse(config config.Config, channel chan<- pluggable.EventResponse, offset time.Duration) {
+	res, err := getResponse(config, offset)
 	err_s := ""
 	if err != nil {
 		err_s = err.Error()
@@ -24,7 +25,7 @@ func getAsyncNodePairResponse(config config.Config, channel chan<- pluggable.Eve
 }
 
 // TODO: add retry logic
-func getResponse(config config.Config) (string, error) {
+func getResponse(config config.Config, offset time.Duration) (string, error) {
 	// edgevpn get payload
 	ctx, _ := context.WithCancel(context.Background())
 	payload := &common.Payload{}
@@ -38,5 +39,5 @@ func getResponse(config config.Config) (string, error) {
 	}
 	log.Info().Any("payload", payload).Msg("Payload received")
 
-	return payload.GetPassword(config)
+	return payload.GetPassword(config, offset)
 }

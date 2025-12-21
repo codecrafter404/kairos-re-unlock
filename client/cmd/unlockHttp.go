@@ -14,6 +14,7 @@ import (
 	"os"
 
 	"github.com/codecrafter404/kairos-re-unlock/common"
+	"github.com/codecrafter404/kairos-re-unlock/droplet/config"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
@@ -45,9 +46,18 @@ var unlockHttpCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to read privateKey")
 		}
+		ntp, err := cmd.Flags().GetString("ntp")
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to get ntp server")
+		}
+
+		log.Info().Msg("[⏰] Get current time")
+		offset := common.QueryOffset(config.Config{
+			NTPServer: ntp,
+		})
 
 		log.Info().Msg("[⚒️] Preparing payload")
-		payload, err := common.NewPayload(string(publicKey), string(privateKey), password)
+		payload, err := common.NewPayload(string(publicKey), string(privateKey), password, offset)
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to generate payload")
 		}
@@ -114,6 +124,7 @@ func init() {
 	unlockHttpCmd.Flags().StringP("public-key", "d", "", "eg ./droplet_pub.pem")
 	unlockHttpCmd.Flags().StringP("private-key", "c", "", "eg ./client_priv.pem")
 	unlockHttpCmd.Flags().IPP("ip", "i", net.ParseIP("127.0.0.1"), "eg. 127.0.0.1")
+	unlockHttpCmd.Flags().StringP("ntp", "", "de.pool.ntp.org", "The ntp pool used for timestamp setting")
 
 	unlockHttpCmd.MarkFlagsOneRequired("public-key", "private-key", "ip")
 }

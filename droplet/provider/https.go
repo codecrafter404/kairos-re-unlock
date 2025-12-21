@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/codecrafter404/kairos-re-unlock/common"
 	"github.com/codecrafter404/kairos-re-unlock/droplet/config"
@@ -11,7 +12,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func getAsyncHttpsResponse(config config.Config, channel chan<- pluggable.EventResponse) {
+func getAsyncHttpsResponse(config config.Config, channel chan<- pluggable.EventResponse, offset time.Duration) {
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("healthy"))
 	})
@@ -32,7 +33,7 @@ func getAsyncHttpsResponse(config config.Config, channel chan<- pluggable.EventR
 			return
 		}
 
-		password, err := passwd.GetPassword(config)
+		password, err := passwd.GetPassword(config, offset)
 
 		if err != nil {
 			log.Err(err).Msg("Failed to get password")

@@ -82,7 +82,7 @@ func (r *Payload) signPayload(privateKey string) error {
 	return nil
 }
 
-func (payload *Payload) Valid(config config.Config) error {
+func (payload *Payload) Valid(config config.Config, offset time.Duration) error {
 	// check signature
 	err := payload.IsValidSignature(config.PublicKey)
 
@@ -92,7 +92,7 @@ func (payload *Payload) Valid(config config.Config) error {
 	}
 
 	// check timestamp
-	now := time.Now().Unix()
+	now := GetCurrentTime(offset).Unix()
 	var gracePeriod int64 = 60 * 15
 
 	if payload.Timestamp < (now-gracePeriod) || payload.Timestamp > now {
@@ -103,8 +103,8 @@ func (payload *Payload) Valid(config config.Config) error {
 	return nil
 }
 
-func (payload *Payload) GetPassword(config config.Config) (string, error) {
-	if err := payload.Valid(config); err != nil {
+func (payload *Payload) GetPassword(config config.Config, offset time.Duration) (string, error) {
+	if err := payload.Valid(config, offset); err != nil {
 		return "", err
 	}
 
@@ -133,13 +133,13 @@ func withPassword(pemPublicKey string, password string) (Payload, error) {
 		EncyptedPassword: base64.StdEncoding.EncodeToString(encryptedPassword),
 	}, nil
 }
-func NewPayload(dropletPublicKey string, clientPrivateKey string, password string) (Payload, error) {
+func NewPayload(dropletPublicKey string, clientPrivateKey string, password string, offset time.Duration) (Payload, error) {
 	payload, err := withPassword(dropletPublicKey, password)
 	if err != nil {
 		return Payload{}, err
 	}
 
-	payload.Timestamp = time.Now().Unix()
+	payload.Timestamp = GetCurrentTime(offset).Unix()
 
 	err = payload.signPayload(clientPrivateKey)
 	if err != nil {
