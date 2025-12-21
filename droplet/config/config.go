@@ -15,6 +15,7 @@ type Config struct {
 	PublicKey    string      `yaml:"public_key"`
 	PrivateKey   string      `yaml:"private_key"`
 	DebugConfig  DebugConfig `yaml:"debug"`
+	NTPServer    string      `yaml:"ntp_server"`
 }
 
 type DebugConfig struct {
@@ -88,6 +89,9 @@ func findConfig(dirs []string) (Config, error) {
 		}
 		if c.DebugConfig.Password != "" && res.DebugConfig.Password == "" {
 			res.DebugConfig.Password = c.DebugConfig.Password
+		}
+		if c.NTPServer != "" && res.NTPServer == "" {
+			res.NTPServer = c.NTPServer
 		}
 		if res.IsComplete() {
 			break

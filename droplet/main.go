@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/codecrafter404/kairos-re-unlock/common"
 	"github.com/codecrafter404/kairos-re-unlock/droplet/config"
@@ -29,12 +30,19 @@ func main() {
 	config, err := config.UnmarshalConfig()
 	checkErr(err)
 
+	if config.NTPServer == "" {
+		config.NTPServer = "de.pool.ntp.org"
+	}
+
+	ntp_offset := common.QueryOffset(config)
+
 	log_level := zerolog.ErrorLevel
-	// if config.DebugConfig != nil {
-	// if config.DebugConfig.LogLevel != nil {
 	log_level = zerolog.Level(config.DebugConfig.LogLevel)
-	// }
-	// }
+
+	zerolog.TimestampFunc = func() time.Time {
+		return common.GetCurrentTime(ntp_offset)
+	}
+
 	log.Logger = zerolog.New(file).
 		Level(log_level).
 		With().
@@ -45,7 +53,7 @@ func main() {
 	log.Info().Msg("Start")
 
 	if len(os.Args) >= 2 && bus.IsEventDefined(os.Args[1]) {
-		checkErr(droplet.Start(config))
+		checkErr(droplet.Start(config, ntp_offset))
 		os.Exit(0)
 	}
 
@@ -54,6 +62,7 @@ func main() {
 	fmt.Printf("EdgeVPN PublicKey: %s\n", config.PublicKey)
 	fmt.Printf("Version: %s\n", common.GetVersionInformation())
 	fmt.Printf("IsDebugEnabled: %+v\n", config.DebugConfig)
+	fmt.Printf("Timeserver: %s\n", config.NTPServer)
 
 }
 

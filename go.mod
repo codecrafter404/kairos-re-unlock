@@ -10,6 +10,7 @@ require (
 )
 
 require (
+	github.com/beevik/ntp v1.5.0
 	github.com/benbjohnson/clock v1.3.5 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/c-robinson/iplib v1.0.8 // indirect
