@@ -79,7 +79,7 @@ func init() {
 	unlockCmd.Flags().StringP("public-key", "d", "", "eg ./droplet_pub.pem")
 	unlockCmd.Flags().StringP("private-key", "c", "", "eg ./client_priv.pem")
 	unlockCmd.Flags().StringP("edgevpn-token", "e", "", "The EdgeVPN token")
-	unlockCmd.Flags().StringP("ntp", "", "de.pool.ntp.org", "The ntp pool used for timestamp setting")
+	unlockCmd.Flags().StringP("ntp", "", "time.cloudflare.com", "The ntp pool used for timestamp setting")
 
 	unlockCmd.MarkFlagsOneRequired("public-key", "private-key", "edgevpn-token")
 }
