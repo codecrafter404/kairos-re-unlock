@@ -124,7 +124,7 @@ func init() {
 	unlockHttpCmd.Flags().StringP("public-key", "d", "", "eg ./droplet_pub.pem")
 	unlockHttpCmd.Flags().StringP("private-key", "c", "", "eg ./client_priv.pem")
 	unlockHttpCmd.Flags().IPP("ip", "i", net.ParseIP("127.0.0.1"), "eg. 127.0.0.1")
-	unlockHttpCmd.Flags().StringP("ntp", "", "de.pool.ntp.org", "The ntp pool used for timestamp setting")
+	unlockHttpCmd.Flags().StringP("ntp", "", "time.cloudflare.com", "The ntp pool used for timestamp setting")
 
 	unlockHttpCmd.MarkFlagsOneRequired("public-key", "private-key", "ip")
 }

@@ -31,7 +31,7 @@ func main() {
 	checkErr(err)
 
 	if config.NTPServer == "" {
-		config.NTPServer = "de.pool.ntp.org"
+		config.NTPServer = "time.cloudflare.com"
 	}
 
 	ntp_offset := common.QueryOffset(config)
