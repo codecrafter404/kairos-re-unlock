@@ -4,6 +4,7 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/codecrafter404/go-nodepair"
@@ -20,7 +21,12 @@ var unlockCmd = &cobra.Command{
 	Long:  `Sends the encrypted and singed payload to the pair in order to let them decrypt their drive`,
 	Args:  cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs),
 	Run: func(cmd *cobra.Command, args []string) {
-		password := args[0]
+		fmt.Print("unlock password: ")
+		var password string
+		_, err := fmt.Scanln(&password)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to read input")
+		}
 
 		log.Info().Msg("[🏗️] Starting up")
 
