@@ -25,7 +25,13 @@ var unlockHttpCmd = &cobra.Command{
 	Short: "Unlock target device over http",
 	Long:  `Sends the encrypted and singed payload (using http) to the pair in order to let them decrypt their drive`,
 	Run: func(cmd *cobra.Command, args []string) {
-		password := args[0]
+
+		fmt.Print("unlock password: ")
+		var password string
+		_, err := fmt.Scanln(&password)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to read input")
+		}
 
 		log.Info().Msg("[🏗️] Starting up")
 
