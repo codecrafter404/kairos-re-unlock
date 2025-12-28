@@ -59,6 +59,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           path: ./build/
+          name: kairos-re-unlock.zip
   build-amd64:
     needs: setup-version
     uses: kairos-io/kairos-factory-action/.github/workflows/reusable-factory.yaml@71d85fe9d4267e373a5d27b4a0fddd44628fb1ba
@@ -116,10 +117,6 @@ jobs:
         with:
           pattern: "*.zip"
           path: /tmp/artifacts
-      - uses: actions/download-artifact@v5
-        with:
-          pattern: "karios-re-unlock*"
-          path: /tmp/cli
       - run: |
           for zipfile in /tmp/artifacts/*.zip; do
               if [ -f "$zipfile" ]; then
