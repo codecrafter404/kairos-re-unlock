@@ -49,13 +49,13 @@ jobs:
       - name: Install dependencies
         run: ls -la && go mod download
       - name: Build mac
-        run: GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build -v ./client/main.go -o karios-re-unlock_mac
+        run: GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build -v -o karios-re-unlock_mac ./client/main.go
       - name: Build linux amd64
-        run: GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v ./client/main.go -o karios-re-unlock_linux-amd64
+        run: GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o karios-re-unlock_linux-amd64 ./client/main.go
       - name: Build linux arm64
-        run: GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v ./client/main.go -o karios-re-unlock_linux-arm64
+        run: GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o karios-re-unlock_linux-arm64 ./client/main.go
       - name: Build linux adnroid arm64
-        run: GOOS=android GOARCH=arm64 CGO_ENABLED=0 go build -v ./client/main.go -o karios-re-unlock_linux-arm64
+        run: GOOS=android GOARCH=arm64 CGO_ENABLED=0 go build -v -o karios-re-unlock_linux-arm64 ./client/main.go
       - uses: actions/upload-artifact@v4
         with:
           path: kairos-re-unlock*
