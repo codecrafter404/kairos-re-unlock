@@ -53,7 +53,9 @@ jobs:
       - name: Build linux amd64
         run: GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o ./build/kairos-re-unlock_linux-amd64 ./client/main.go
       - name: Build linux arm64
-        run: GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o ./build/kairos-re-unlock_linux-arm64 ./client/main.go
+        run: GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -v -o ./build/kairos-re-unlock_linux-arm64 ./client/main.go
+      - name: Build linux arm (32-Bit)
+        run: GOOS=linux GOARCH=arm CGO_ENABLED=0 go build -v -o ./build/kairos-re-unlock_linux-arm64 ./client/main.go
       - name: ls
         run: ls -la
       - uses: actions/upload-artifact@v4
