@@ -133,6 +133,7 @@ jobs:
           print(str.join(",", res))')
           echo "artifacts=${arts}" >> ""$GITHUB_OUTPUT""
         id: artifacts
+      - run: find /tmp/ -type f
       - uses: ncipollo/release-action@v1.20.0
         with:
           artifacts: ${{ steps.artifacts.outputs.artifacts }}
