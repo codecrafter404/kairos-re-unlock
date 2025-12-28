@@ -54,9 +54,11 @@ jobs:
         run: GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o karios-re-unlock_linux-amd64 ./client/main.go
       - name: Build linux arm64
         run: GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o karios-re-unlock_linux-arm64 ./client/main.go
+      - name: ls
+        run: ls -la
       - uses: actions/upload-artifact@v4
         with:
-          path: kairos-re-unlock*
+          path: ./kairos-re-unlock*
   build-amd64:
     needs: setup-version
     uses: kairos-io/kairos-factory-action/.github/workflows/reusable-factory.yaml@71d85fe9d4267e373a5d27b4a0fddd44628fb1ba
