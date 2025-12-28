@@ -15,12 +15,14 @@ FROM base-kairos as discovery-installed
 # TODO: optimize the process to rebuild the initramfs when installing in order to only include the necessary wifi drivers
 COPY ./initramfs/wifi.* /etc/mkinitfs/features.d
 COPY --chmod=755 ./initramfs/initramfs-* /usr/sbin/
+COPY ./initramfs/mkinitfs.conf.ext /etc/mkinitfs/
 RUN ldd /sbin/wpa_supplicant | sed -E "s/.* \//\//" | sed -E "s/ .*//" | tr -d '[:blank:]' >> /etc/mkinitfs/features.d/wifi.files &&\
     ldd /sbin/wpa_cli | sed -E "s/.* \//\//" | sed -E "s/ .*//" | tr -d '[:blank:]' >> /etc/mkinitfs/features.d/wifi.files &&\
     cat /etc/mkinitfs/features.d/wifi.files | sort -u > /etc/mkinitfs/features.d/wifi.files2 &&\
     rm /etc/mkinitfs/features.d/wifi.files && mv /etc/mkinitfs/features.d/wifi.files2 /etc/mkinitfs/features.d/wifi.files &&\
     sed -E "s/\"\$/ wifi\"/" -i /etc/mkinitfs/mkinitfs.conf &&\
     sed '/rd_break\ post-network/i \/usr\/sbin\/initramfs-start-wifi.sh' -i /usr/share/mkinitfs/initramfs-init &&\
+    cat /etc/mkinitfs/mkinitfs.conf.ext >> /etc/mkinitfs/mkinitfs.conf &&\
     mkinitfs -o /boot/initrd $(ls -1 /lib/modules | tail -n 1)
 
 # Copy custom system config into /system/oem
