@@ -38,6 +38,27 @@ jobs:
         run: |
           echo "kubernetes_version=${{ env.KUBERNETES_VERSION }}" >> "$GITHUB_OUTPUT"
           echo "base_image=${{ env.BASE_IMAGE }}" >> "$GITHUB_OUTPUT"
+  build-cli:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.5'
+      - name: Install dependencies
+        run: go get .
+      - name: Build mac
+        run: GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build -v ./client/main.go -o karios-re-unlock_mac
+      - name: Build linux amd64
+        run: GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v ./client/main.go -o karios-re-unlock_linux-amd64
+      - name: Build linux arm64
+        run: GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v ./client/main.go -o karios-re-unlock_linux-arm64
+      - name: Build linux adnroid arm64
+        run: GOOS=android GOARCH=arm64 CGO_ENABLED=0 go build -v ./client/main.go -o karios-re-unlock_linux-arm64
+      - uses: actions/upload-artifact@v4
+        with:
+          path: kairos-re-unlock*
   build-amd64:
     needs: setup-version
     uses: kairos-io/kairos-factory-action/.github/workflows/reusable-factory.yaml@71d85fe9d4267e373a5d27b4a0fddd44628fb1ba
@@ -88,13 +109,17 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: write
-    needs: ["build-amd64", "build-rpi", "setup-version"]
+    needs: ["build-amd64", "build-rpi", "setup-version", "build-cli"]
     steps:
       - run: mkdir /tmp/artifacts
       - uses: actions/download-artifact@v5
         with:
           pattern: "*.zip"
           path: /tmp/artifacts
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: "karios-re-unlock*"
+          path: /tmp/cli
       - run: |
           for zipfile in /tmp/artifacts/*.zip; do
               if [ -f "$zipfile" ]; then
@@ -106,7 +131,7 @@ jobs:
           res = []
           for root, dirs, files in os.walk("/tmp/"):
               for name in files:
-                  if name.endswith(".raw") or name.endswith(".iso"):
+                  if name.endswith(".raw") or name.endswith(".iso") or name.startswith("kairos-re-unlock"):
                       res.append(os.path.join(root, name))
           print(str.join(",", res))')
           echo "artifacts=${arts}" >> ""$GITHUB_OUTPUT""
