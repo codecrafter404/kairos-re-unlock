@@ -1,13 +1,18 @@
 package provider
 
 import (
+	"encoding/json"
+	"io"
+	"os"
+	"os/exec"
 	"time"
 
 	"github.com/codecrafter404/kairos-re-unlock/droplet/config"
 	"github.com/mudler/go-pluggable"
+	"github.com/rs/zerolog/log"
 )
 
-func GetResponse(config config.Config, offset time.Duration) pluggable.EventResponse {
+func GetResponse(config config.Config, offset time.Duration) *pluggable.EventResponse {
 
 	datachan := make(chan pluggable.EventResponse)
 
@@ -15,5 +20,65 @@ func GetResponse(config config.Config, offset time.Duration) pluggable.EventResp
 	go getAsyncHttpsResponse(config, datachan, offset)
 	go getDebugPassword(config, datachan)
 
-	return <-datachan
+	res := <-datachan
+
+	if testPassword(res, config) {
+		return &res
+	}
+	log.Error().Any("response", res).Msg("Got invalid response")
+	return nil
+}
+
+func testPassword(event pluggable.EventResponse, conf config.Config) bool {
+	if conf.DebugConfig.BypassPasswordTest {
+		return true
+	}
+
+	if event.Error != "" {
+		return false
+	}
+
+	cmd := exec.Command("cryptsetup", "luksOpen", "--test-passphrase")
+	res := cmd.Run()
+	if res != nil {
+		log.Error().Err(res).Msg("Got invalid test response")
+		return false
+	}
+
+	return true
+}
+
+func getDevice() string {
+	err_return := "/dev/sda5"
+
+	input, err := io.ReadAll(os.Stdin)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to read from stdin")
+		return err_return
+	}
+
+	var event pluggable.Event
+	err = json.Unmarshal(input, &event)
+	if err != nil {
+		log.Err(err).Str("stdin", string(input)).Msg("Failed to unmarshall stdin")
+		return err_return
+	}
+
+	var discovery_password_payload DiscoveryPasswordPayload
+
+	err = json.Unmarshal([]byte(event.Data), &discovery_password_payload)
+
+	if err != nil {
+		log.Err(err).Str("event.data", string(event.Data)).Msg("Failed to unmarshall data")
+		return err_return
+	}
+	if discovery_password_payload.Partition == nil {
+		log.Warn().Str("fallback", err_return).Msg("Got no partition data")
+		return err_return
+	}
+
+	//TODO: implement
+	log.Info().Str("input", string(input)).Msg("INPUUUUUUTTT")
+
+	return err_return
 }

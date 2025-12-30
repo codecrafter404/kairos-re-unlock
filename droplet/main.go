@@ -24,8 +24,17 @@ func main() {
 		os.O_APPEND|os.O_CREATE|os.O_WRONLY,
 		0664,
 	)
+
 	checkErr(err)
 	defer file.Close()
+	console, err := os.OpenFile(
+		"/dev/console",
+		os.O_WRONLY,
+		0666,
+	)
+	if err != nil {
+		log.Warn().Err(err).Msg("Failed to open console for logging")
+	}
 
 	config, err := config.UnmarshalConfig()
 	checkErr(err)
@@ -43,7 +52,14 @@ func main() {
 		return common.GetCurrentTime(ntp_offset)
 	}
 
-	log.Logger = zerolog.New(file).
+	multi_logger := zerolog.MultiLevelWriter(file)
+	if console != nil {
+		multi_logger = zerolog.MultiLevelWriter(file, zerolog.ConsoleWriter{
+			Out: console,
+		})
+	}
+
+	log.Logger = zerolog.New(multi_logger).
 		Level(log_level).
 		With().
 		Timestamp().
@@ -52,7 +68,7 @@ func main() {
 
 	log.Info().Msg("Start")
 
-	if len(os.Args) >= 2 && bus.IsEventDefined(os.Args[1]) {
+	if len(os.Args) >= 2 && os.Args[1] == "discovery.password" {
 		checkErr(droplet.Start(config, ntp_offset))
 		os.Exit(0)
 	}

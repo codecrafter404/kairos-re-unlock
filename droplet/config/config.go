@@ -11,25 +11,23 @@ import (
 )
 
 type Config struct {
-	EdgeVPNToken string      `yaml:"edgevpn_token"`
-	PublicKey    string      `yaml:"public_key"`
-	PrivateKey   string      `yaml:"private_key"`
-	DebugConfig  DebugConfig `yaml:"debug"`
-	NTPServer    string      `yaml:"ntp_server"`
+	EdgeVPNToken   string      `yaml:"edgevpn_token"`
+	PublicKey      string      `yaml:"public_key"`
+	PrivateKey     string      `yaml:"private_key"`
+	DebugConfig    DebugConfig `yaml:"debug"`
+	NTPServer      string      `yaml:"ntp_server"`
+	DiscordWebhook string      `yaml:"discord_webhook"`
 }
 
 type DebugConfig struct {
-	Enabled  bool   `yaml:"enabled"`
-	LogLevel int    `yaml:"log_level"`
-	Password string `yaml:"password"`
+	Enabled            bool   `yaml:"enabled"`
+	LogLevel           int    `yaml:"log_level"`
+	Password           string `yaml:"password"`
+	BypassPasswordTest bool   `yaml:"bypass_password_test"`
 }
 
 func (c Config) IsDebugEnabled() bool {
-	// if c.DebugConfig != nil {
-	// if c.DebugConfig.Enabled != nil {
 	return c.DebugConfig.Enabled
-	// }
-	// }
 }
 
 func (c Config) IsComplete() bool {
@@ -81,8 +79,14 @@ func findConfig(dirs []string) (Config, error) {
 		if res.PublicKey == "" && c.PublicKey != "" {
 			res.PublicKey = c.PublicKey
 		}
+		if res.DiscordWebhook == "" && c.DiscordWebhook != "" {
+			res.DiscordWebhook = c.DiscordWebhook
+		}
 		if c.DebugConfig.Enabled && !res.DebugConfig.Enabled {
 			res.DebugConfig.Enabled = true
+		}
+		if c.DebugConfig.BypassPasswordTest && !res.DebugConfig.BypassPasswordTest {
+			res.DebugConfig.BypassPasswordTest = true
 		}
 		if c.DebugConfig.LogLevel != 0 && res.DebugConfig.LogLevel == 0 {
 			res.DebugConfig.LogLevel = c.DebugConfig.LogLevel
