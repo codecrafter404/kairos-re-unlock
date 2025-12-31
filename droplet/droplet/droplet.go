@@ -1,7 +1,9 @@
 package droplet
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 	"time"
@@ -13,28 +15,31 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func Start(config config.Config, offset time.Duration) error {
+func Start(config config.Config, offset time.Duration, stdin []byte) error {
 	log.Debug().Any("config", config).Msg("Starting discovery")
 
 	// capture input
 	var res *pluggable.EventResponse
+	old := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
 	for {
 
 		log.Info().Msg("Waiting for unlock password")
 		notify.SendNotification("waiting for unlock password", config)
-		old := os.Stdout
-		r, w, _ := os.Pipe()
-		os.Stdout = w
 
-		maybe_response := provider.GetResponse(config, offset)
+		ctx, cancel := context.WithCancel(context.Background())
+
+		maybe_response := provider.GetResponse(config, offset, stdin, ctx)
 		if maybe_response != nil {
 			res = maybe_response
 		}
+		go func() {
+			<-ctx.Done()
+			fmt.Println("Context done")
+		}()
 
-		w.Close()
-		out, _ := io.ReadAll(r)
-		os.Stdout = old
-		log.Info().Str("output", string(out)).Msg("Got Nodepair logs")
+		cancel()
 
 		if res != nil {
 			break
@@ -43,6 +48,11 @@ func Start(config config.Config, offset time.Duration) error {
 		notify.SendNotification("Got no valid password; timeout for 30s", config)
 		time.Sleep(time.Second * 30)
 	}
+
+	w.Close()
+	out, _ := io.ReadAll(r)
+	os.Stdout = old
+	log.Info().Str("output", string(out)).Msg("Got Nodepair logs")
 
 	enc := json.NewEncoder(os.Stdout)
 	enc.SetEscapeHTML(false)

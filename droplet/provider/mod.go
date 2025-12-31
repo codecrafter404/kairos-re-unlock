@@ -1,9 +1,9 @@
 package provider
 
 import (
+	"context"
 	"encoding/json"
 	"io"
-	"os"
 	"os/exec"
 	"time"
 
@@ -12,24 +12,24 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func GetResponse(config config.Config, offset time.Duration) *pluggable.EventResponse {
+func GetResponse(config config.Config, offset time.Duration, stdin []byte, ctx context.Context) *pluggable.EventResponse {
 
 	datachan := make(chan pluggable.EventResponse)
 
-	go getAsyncNodePairResponse(config, datachan, offset)
-	go getAsyncHttpsResponse(config, datachan, offset)
+	go getAsyncNodePairResponse(config, datachan, offset, ctx)
+	go getAsyncHttpsResponse(config, datachan, offset, ctx)
 	go getDebugPassword(config, datachan)
 
 	res := <-datachan
 
-	if testPassword(res, config) {
+	if validatePassword(res, config, stdin) {
 		return &res
 	}
 	log.Error().Any("response", res).Msg("Got invalid response")
 	return nil
 }
 
-func testPassword(event pluggable.EventResponse, conf config.Config) bool {
+func validatePassword(event pluggable.EventResponse, conf config.Config, stdin []byte) bool {
 	if conf.DebugConfig.BypassPasswordTest {
 		return true
 	}
@@ -38,7 +38,7 @@ func testPassword(event pluggable.EventResponse, conf config.Config) bool {
 		return false
 	}
 
-	device := getDevice()
+	device := getDevice(stdin)
 	if device == "" {
 		log.Warn().Msg("Got no device; skipping password validation")
 		return true
@@ -65,18 +65,13 @@ func testPassword(event pluggable.EventResponse, conf config.Config) bool {
 	return true
 }
 
-func getDevice() string {
-	input, err := io.ReadAll(os.Stdin)
-	if err != nil {
-		log.Error().Err(err).Msg("Failed to read from stdin")
-		return ""
-	}
-	log.Info().Str("input", string(input)).Msg("Got input")
+func getDevice(stdin []byte) string {
+	log.Info().Str("input", string(stdin)).Msg("Got input")
 
 	var event pluggable.Event
-	err = json.Unmarshal(input, &event)
+	err := json.Unmarshal(stdin, &event)
 	if err != nil {
-		log.Error().Err(err).Str("stdin", string(input)).Msg("Failed to unmarshall stdin")
+		log.Error().Err(err).Str("stdin", string(stdin)).Msg("Failed to unmarshall stdin")
 		return ""
 	}
 

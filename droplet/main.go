@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"time"
 
@@ -68,7 +69,11 @@ func main() {
 	log.Info().Msg("Start")
 
 	if len(os.Args) >= 2 && os.Args[1] == "discovery.password" {
-		checkErr(droplet.Start(config, ntp_offset))
+		input, err := io.ReadAll(os.Stdin)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to read from stdin")
+		}
+		checkErr(droplet.Start(config, ntp_offset, input))
 		os.Exit(0)
 	}
 

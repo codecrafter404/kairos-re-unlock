@@ -1,7 +1,9 @@
 package provider
 
 import (
+	"context"
 	"encoding/json"
+	"net"
 	"net/http"
 	"os"
 	"time"
@@ -12,8 +14,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func getAsyncHttpsResponse(config config.Config, channel chan<- pluggable.EventResponse, offset time.Duration) {
-	srv := http.Server{Addr: ":505"}
+func getAsyncHttpsResponse(config config.Config, channel chan<- pluggable.EventResponse, offset time.Duration, ctx context.Context) {
+	srv := http.Server{Addr: ":505", BaseContext: func(l net.Listener) context.Context { return ctx }}
 
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("healthy"))
