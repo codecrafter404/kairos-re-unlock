@@ -22,7 +22,6 @@ func GetResponse(config config.Config, offset time.Duration) *pluggable.EventRes
 
 	res := <-datachan
 
-	log.Info().Msg("Got response")
 	if testPassword(res, config) {
 		return &res
 	}
@@ -40,11 +39,11 @@ func testPassword(event pluggable.EventResponse, conf config.Config) bool {
 	}
 
 	device := getDevice()
-	log.Info().Str("device", device).Msg("Got device")
 	if device == "" {
 		log.Warn().Msg("Got no device; skipping password validation")
 		return true
 	}
+
 	cmd := exec.Command("cryptsetup", "luksOpen", "--test-passphrase", device)
 	input_pipe, err := cmd.StdinPipe()
 	log.Error().Err(err).Msg("Failed to open stdin pipe")
@@ -73,6 +72,7 @@ func getDevice() string {
 		log.Error().Err(err).Msg("Failed to read from stdin")
 		return ""
 	}
+	log.Info().Str("input", string(input)).Msg("Got input")
 
 	var event pluggable.Event
 	err = json.Unmarshal(input, &event)
@@ -90,7 +90,7 @@ func getDevice() string {
 		return ""
 	}
 	if discovery_password_payload.Partition == nil {
-		log.Warn().Msg("Got no partition data")
+		log.Warn().Str("data", string(input)).Msg("Got no partition data")
 		return ""
 	}
 

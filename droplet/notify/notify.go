@@ -18,8 +18,8 @@ func SendNotification(msg string, config config.Config) {
 		log.Error().Err(err).Msg("Failed to initialize discord webhook")
 	}
 	_, err = client.CreateMessage(discord.WebhookMessageCreate{
-		Content:  msg,
-		Username: "KairosReUnlock",
+		Content: msg,
+		// Username: "KairosReUnlock",
 	})
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to send discord message")
