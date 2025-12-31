@@ -13,6 +13,8 @@ import (
 )
 
 func getAsyncHttpsResponse(config config.Config, channel chan<- pluggable.EventResponse, offset time.Duration) {
+	srv := http.Server{Addr: ":505"}
+
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("healthy"))
 	})
@@ -49,6 +51,11 @@ func getAsyncHttpsResponse(config config.Config, channel chan<- pluggable.EventR
 
 		w.WriteHeader(http.StatusAccepted)
 		w.Write([]byte("received"))
+		go func() {
+			log.Info().Msg("Shutting down http server")
+			srv.Shutdown(r.Context())
+			http.DefaultServeMux = http.NewServeMux()
+		}()
 	})
 
 	if config.IsDebugEnabled() {
@@ -65,7 +72,7 @@ func getAsyncHttpsResponse(config config.Config, channel chan<- pluggable.EventR
 	}
 
 	log.Info().Msg("Listening on :505")
-	err := http.ListenAndServe(":505", nil)
+	err := srv.ListenAndServe()
 	if err != nil {
 		log.Err(err).Msg("Failed to listen and serve")
 	}

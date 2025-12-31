@@ -46,20 +46,19 @@ func testPassword(event pluggable.EventResponse, conf config.Config) bool {
 
 	cmd := exec.Command("cryptsetup", "luksOpen", "--test-passphrase", device)
 	input_pipe, err := cmd.StdinPipe()
-	log.Error().Err(err).Msg("Failed to open stdin pipe")
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to open stdin pipe")
 
-	log.Info().Msg("Running command")
+	}
+
 	go func() {
-		log.Info().Msg("sending text")
 		defer input_pipe.Close()
 		io.WriteString(input_pipe, event.Data)
-		log.Info().Msg("sent text")
 	}()
 
-	log.Info().Msg("capture output")
 	res, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Error().Err(err).Str("stdout", string(res)).Msg("Got invalid test response")
+		log.Error().Err(err).Str("stdout", string(res)).Msg("Got negative test response")
 		return false
 	}
 
@@ -90,7 +89,7 @@ func getDevice() string {
 		return ""
 	}
 	res := "/dev/" + partition.Name
-	log.Info().Str("input", string(input)).Str("res", res).Msg("INPUUUUUUTTT")
+	log.Info().Str("device", res).Msg("Found device")
 
 	return res
 }
