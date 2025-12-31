@@ -35,6 +35,32 @@ kairos-re-unlock new
 ```
 This command also outputs the corresponding public and private keys to be used for decryption.
 
+### Notification
+In order to allow discord notifications add the `discord_webhook` parameter:
+```yaml
+kcrypt:
+   remote_unlock:
+      discord_webhook: https://discord.com/api/webhooks/<snap>
+```
+### Debug
+The're some debug options. Debug mode has to be enabled before the other options may be used.
+
+> WARNING: Debug options should not be enabled in production as they leak the private and public key of the droplet on the `/logs` endpoint.
+
+```yaml
+kcrypt:
+   remote_unlock:
+      debug:
+         enabled: false
+         # Integer log level
+         log_level: -1
+         # Provides the password and therefore there is no need to enable encryption
+         password: supersecurepassword
+         # Bypasses the password validation which leads to broken systems, if a wrong password is provided
+         bypass_password_test: false
+```
+
+
 ## Naming
 - The decryption is handled by the `droplet` on the kairos-machine
 - the `client` sends the password

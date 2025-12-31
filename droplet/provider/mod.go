@@ -52,7 +52,7 @@ func testPassword(event pluggable.EventResponse, conf config.Config) bool {
 	go func() {
 		log.Info().Msg("sending text")
 		defer input_pipe.Close()
-		io.WriteString(input_pipe, event.Data+"\n")
+		io.WriteString(input_pipe, event.Data)
 		log.Info().Msg("sent text")
 	}()
 
@@ -81,21 +81,16 @@ func getDevice() string {
 		return ""
 	}
 
-	var discovery_password_payload DiscoveryPasswordPayload
+	var partition Partition
 
-	err = json.Unmarshal([]byte(event.Data), &discovery_password_payload)
+	err = json.Unmarshal([]byte(event.Data), &partition)
 
 	if err != nil {
 		log.Err(err).Str("event.data", string(event.Data)).Msg("Failed to unmarshall data")
 		return ""
 	}
-	if discovery_password_payload.Partition == nil {
-		log.Warn().Str("data", string(input)).Msg("Got no partition data")
-		return ""
-	}
+	res := "/dev/" + partition.Name
+	log.Info().Str("input", string(input)).Str("res", res).Msg("INPUUUUUUTTT")
 
-	//TODO: implement
-	log.Info().Str("input", string(input)).Msg("INPUUUUUUTTT")
-
-	return ""
+	return res
 }
