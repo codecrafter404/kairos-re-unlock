@@ -22,6 +22,7 @@ func GetResponse(config config.Config, offset time.Duration) *pluggable.EventRes
 
 	res := <-datachan
 
+	log.Info().Msg("Got response")
 	if testPassword(res, config) {
 		return &res
 	}
@@ -38,10 +39,28 @@ func testPassword(event pluggable.EventResponse, conf config.Config) bool {
 		return false
 	}
 
-	cmd := exec.Command("cryptsetup", "luksOpen", "--test-passphrase")
-	res := cmd.Run()
-	if res != nil {
-		log.Error().Err(res).Msg("Got invalid test response")
+	device := getDevice()
+	log.Info().Str("device", device).Msg("Got device")
+	if device == "" {
+		log.Warn().Msg("Got no device; skipping password validation")
+		return true
+	}
+	cmd := exec.Command("cryptsetup", "luksOpen", "--test-passphrase", device)
+	input_pipe, err := cmd.StdinPipe()
+	log.Error().Err(err).Msg("Failed to open stdin pipe")
+
+	log.Info().Msg("Running command")
+	go func() {
+		log.Info().Msg("sending text")
+		defer input_pipe.Close()
+		io.WriteString(input_pipe, event.Data+"\n")
+		log.Info().Msg("sent text")
+	}()
+
+	log.Info().Msg("capture output")
+	res, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Error().Err(err).Str("stdout", string(res)).Msg("Got invalid test response")
 		return false
 	}
 
@@ -49,19 +68,17 @@ func testPassword(event pluggable.EventResponse, conf config.Config) bool {
 }
 
 func getDevice() string {
-	err_return := "/dev/sda5"
-
 	input, err := io.ReadAll(os.Stdin)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to read from stdin")
-		return err_return
+		return ""
 	}
 
 	var event pluggable.Event
 	err = json.Unmarshal(input, &event)
 	if err != nil {
-		log.Err(err).Str("stdin", string(input)).Msg("Failed to unmarshall stdin")
-		return err_return
+		log.Error().Err(err).Str("stdin", string(input)).Msg("Failed to unmarshall stdin")
+		return ""
 	}
 
 	var discovery_password_payload DiscoveryPasswordPayload
@@ -70,15 +87,15 @@ func getDevice() string {
 
 	if err != nil {
 		log.Err(err).Str("event.data", string(event.Data)).Msg("Failed to unmarshall data")
-		return err_return
+		return ""
 	}
 	if discovery_password_payload.Partition == nil {
-		log.Warn().Str("fallback", err_return).Msg("Got no partition data")
-		return err_return
+		log.Warn().Msg("Got no partition data")
+		return ""
 	}
 
 	//TODO: implement
 	log.Info().Str("input", string(input)).Msg("INPUUUUUUTTT")
 
-	return err_return
+	return ""
 }

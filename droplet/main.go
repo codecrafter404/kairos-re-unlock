@@ -8,7 +8,6 @@ import (
 	"github.com/codecrafter404/kairos-re-unlock/common"
 	"github.com/codecrafter404/kairos-re-unlock/droplet/config"
 	"github.com/codecrafter404/kairos-re-unlock/droplet/droplet"
-	"github.com/kairos-io/kcrypt/pkg/bus"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )

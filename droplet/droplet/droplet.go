@@ -20,6 +20,7 @@ func Start(config config.Config, offset time.Duration) error {
 	var res *pluggable.EventResponse
 	for {
 
+		log.Info().Msg("Waiting for unlock password")
 		notify.SendNotification("waiting for unlock password", config)
 		old := os.Stdout
 		r, w, _ := os.Pipe()
