@@ -1,8 +1,10 @@
 package main
 
 import (
+	"crypto/tls"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"time"
 
@@ -44,6 +46,15 @@ func main() {
 	}
 
 	ntp_offset := common.QueryOffset(config)
+
+	if res, ok := http.DefaultTransport.(*http.Transport); ok {
+		if res.TLSClientConfig == nil {
+			res.TLSClientConfig = &tls.Config{}
+		}
+		res.TLSClientConfig.Time = func() time.Time {
+			return common.GetCurrentTime(ntp_offset)
+		}
+	}
 
 	log_level := zerolog.ErrorLevel
 	log_level = zerolog.Level(config.DebugConfig.LogLevel)
