@@ -3,7 +3,6 @@ package droplet
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"os"
 	"time"
@@ -34,10 +33,6 @@ func Start(config config.Config, offset time.Duration, stdin []byte) error {
 		if maybe_response != nil {
 			res = maybe_response
 		}
-		go func() {
-			<-ctx.Done()
-			fmt.Println("Context done")
-		}()
 
 		cancel()
 
