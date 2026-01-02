@@ -53,11 +53,6 @@ func getAsyncHttpsResponse(config config.Config, channel chan<- pluggable.EventR
 
 		w.WriteHeader(http.StatusAccepted)
 		w.Write([]byte("received"))
-		go func() {
-			log.Info().Msg("Shutting down http server")
-			srv.Shutdown(r.Context())
-			http.DefaultServeMux = http.NewServeMux()
-		}()
 	})
 
 	if config.IsDebugEnabled() {
@@ -73,9 +68,21 @@ func getAsyncHttpsResponse(config config.Config, channel chan<- pluggable.EventR
 		})
 	}
 
-	log.Info().Msg("Listening on :505")
-	err := srv.ListenAndServe()
-	if err != nil {
-		log.Err(err).Msg("Failed to listen and serve")
+	var err chan error
+	go func() {
+		log.Info().Msg("Listening on :505")
+		res := srv.ListenAndServe()
+		err <- res
+	}()
+
+	select {
+	case res := <-err:
+		if res != http.ErrServerClosed {
+			log.Error().Err(res).Msg("Server start failed")
+		}
+	case <-ctx.Done():
+		if err := srv.Shutdown(ctx); err != nil {
+			log.Warn().Err(err).Msg("Server shutdown failed")
+		}
 	}
 }
