@@ -47,7 +47,7 @@ enable () {
 
 }
 
-if [$# -eq 0]; then
+if [ $# -eq 0 ]; then
 	echo -n "Testing wifi config"
 
 	OEM=$(kairos-agent state get oem.name)
