@@ -73,16 +73,20 @@ func getAsyncHttpsResponse(config config.Config, channel chan<- pluggable.EventR
 		log.Info().Msg("Listening on :505")
 		res := srv.ListenAndServe()
 		err <- res
+		log.Info().Msg("End")
 	}()
 
 	select {
 	case res := <-err:
 		if res != http.ErrServerClosed {
+			log.Info().Msg("Context done")
 			log.Error().Err(res).Msg("Server start failed")
 		}
 	case <-ctx.Done():
 		if err := srv.Shutdown(ctx); err != nil {
 			log.Warn().Err(err).Msg("Server shutdown failed")
 		}
+		http.DefaultServeMux = http.NewServeMux()
+		log.Info().Msg("Http server shutdown")
 	}
 }

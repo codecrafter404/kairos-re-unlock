@@ -58,7 +58,11 @@ func validatePassword(event pluggable.EventResponse, conf config.Config, stdin [
 
 	res, err := cmd.CombinedOutput()
 	if err != nil {
-		exit := err.(*exec.ExitError)
+		exit, ok := err.(*exec.ExitError)
+		if !ok {
+			log.Error().Err(err).Msg("Exec error")
+			return true
+		}
 		code := exit.ExitCode()
 		if code == 2 {
 			log.Error().Msg("Got negative test response")
