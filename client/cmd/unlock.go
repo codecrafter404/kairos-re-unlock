@@ -16,10 +16,9 @@ import (
 
 // unlockCmd represents the unlock command
 var unlockCmd = &cobra.Command{
-	Use:   "unlock [password]",
+	Use:   "unlock",
 	Short: "Unlock target device (nodepair)",
 	Long:  `Sends the encrypted and singed payload to the pair in order to let them decrypt their drive`,
-	Args:  cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs),
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Print("unlock password: ")
 		var password string

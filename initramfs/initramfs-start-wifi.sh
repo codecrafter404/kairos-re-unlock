@@ -3,6 +3,14 @@ INTERFACE="wlan0"
 CONFIG="/tmp/mnt/OEM/wpa.conf"
 CONNECT_TIMEOUT=30
 
+find_interface () {
+    for interface in /sys/class/net/*; do
+	if [ -d "$interface/wireless" ]; then
+		INTERFACE=$(basename "$interface")
+	fi
+    done
+}
+
 enable () {
 	/sbin/wpa_supplicant -i "$INTERFACE" -c "$CONFIG" -P /run/initram-wpa_supplicant.pid -B -d
 
@@ -39,17 +47,23 @@ enable () {
 
 }
 
-echo -n "Testing wifi config"
+if [$# -eq 0]; then
+	echo -n "Testing wifi config"
 
-OEM=$(kairos-agent state get oem.name)
+	OEM=$(kairos-agent state get oem.name)
 
-mkdir -p /tmp/mnt/OEM
-mount ${OEM} /tmp/mnt/OEM
-
-if [ -f "$CONFIG" ]; then
-	
-	enable
+	mkdir -p /tmp/mnt/OEM
+	mount ${OEM} /tmp/mnt/OEM
+	if [ -f "$CONFIG" ]; then
+		find_interface
+		enable
+	fi
+	umount /tmp/mnt/OEM
+	rm -rf /tmp/mnt/OEM
+else
+	CONFIG="$1"
+	if [ -f "$CONFIG" ]; then
+		find_interface
+		enable
+	fi
 fi
-
-umount /tmp/mnt/OEM
-rm -rf /tmp/mnt/OEM
