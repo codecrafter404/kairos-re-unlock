@@ -19,6 +19,7 @@ func GetResponse(config config.Config, offset time.Duration, stdin []byte, ctx c
 	go getAsyncNodePairResponse(config, datachan, offset, ctx)
 	go getAsyncHttpsResponse(config, datachan, offset, ctx)
 	go getDebugPassword(config, datachan)
+	go getHttpPullResponse(config, datachan, offset, ctx)
 
 	res := <-datachan
 

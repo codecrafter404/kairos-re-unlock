@@ -17,6 +17,7 @@ type Config struct {
 	DebugConfig    DebugConfig `yaml:"debug"`
 	NTPServer      string      `yaml:"ntp_server"`
 	DiscordWebhook string      `yaml:"discord_webhook"`
+	HttpPull       []string    `yaml:"http_pull"`
 }
 
 type DebugConfig struct {
@@ -79,6 +80,10 @@ func findConfig(dirs []string) (Config, error) {
 		if res.PublicKey == "" && c.PublicKey != "" {
 			res.PublicKey = c.PublicKey
 		}
+		if len(res.HttpPull) == 0 && len(c.HttpPull) > 0 {
+			res.HttpPull = c.HttpPull
+		}
+
 		if res.DiscordWebhook == "" && c.DiscordWebhook != "" {
 			res.DiscordWebhook = c.DiscordWebhook
 		}
