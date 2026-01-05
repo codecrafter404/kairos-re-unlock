@@ -68,6 +68,21 @@ var unlockHttpCmd = &cobra.Command{
 			log.Fatal().Err(err).Msg("Failed to generate payload")
 		}
 
+		payload_string, err := json.Marshal(payload)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to marshal json payload")
+		}
+
+		dry_run, err := cmd.Flags().GetBool("dry-run")
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to read flag 'dry-run'")
+		}
+
+		if dry_run {
+			fmt.Println(string(payload_string))
+			return
+		}
+
 		log.Info().Msg("[👨‍⚕️] Check if system is healthy")
 		host, err := cmd.Flags().GetIP("ip")
 		if err != nil {
@@ -99,10 +114,6 @@ var unlockHttpCmd = &cobra.Command{
 			Host:   fmt.Sprintf("%s:505", host.String()),
 			Path:   "/unlock",
 		}
-		payload_string, err := json.Marshal(payload)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to marshal json payload")
-		}
 
 		resp, err = http.Post(req_url.String(), "application/json", bytes.NewBuffer(payload_string))
 
@@ -131,6 +142,7 @@ func init() {
 	unlockHttpCmd.Flags().StringP("private-key", "c", "", "eg ./client_priv.pem")
 	unlockHttpCmd.Flags().IPP("ip", "i", net.ParseIP("127.0.0.1"), "eg. 127.0.0.1")
 	unlockHttpCmd.Flags().StringP("ntp", "", "time.cloudflare.com", "The ntp pool used for timestamp setting")
+	unlockHttpCmd.Flags().Bool("dry-run", false, "Don't sent the request, only print the request body to the console")
 
 	unlockHttpCmd.MarkFlagsOneRequired("public-key", "private-key", "ip")
 }

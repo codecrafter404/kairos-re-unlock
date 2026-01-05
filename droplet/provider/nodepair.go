@@ -11,8 +11,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func getAsyncNodePairResponse(config config.Config, channel chan<- pluggable.EventResponse, offset time.Duration) {
-	res, err := getResponse(config, offset)
+func getAsyncNodePairResponse(config config.Config, channel chan<- pluggable.EventResponse, offset time.Duration, ctx context.Context) {
+	res, err := getResponse(config, offset, ctx)
 	err_s := ""
 	if err != nil {
 		err_s = err.Error()
@@ -25,9 +25,8 @@ func getAsyncNodePairResponse(config config.Config, channel chan<- pluggable.Eve
 }
 
 // TODO: add retry logic
-func getResponse(config config.Config, offset time.Duration) (string, error) {
+func getResponse(config config.Config, offset time.Duration, ctx context.Context) (string, error) {
 	// edgevpn get payload
-	ctx, _ := context.WithCancel(context.Background())
 	payload := &common.Payload{}
 
 	log.Info().Msg("Waiting for payload")
