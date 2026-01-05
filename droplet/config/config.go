@@ -11,11 +11,21 @@ import (
 )
 
 type Config struct {
+<<<<<<< Updated upstream
 	EdgeVPNToken string      `yaml:"edgevpn_token"`
 	PublicKey    string      `yaml:"public_key"`
 	PrivateKey   string      `yaml:"private_key"`
 	DebugConfig  DebugConfig `yaml:"debug"`
 	NTPServer    string      `yaml:"ntp_server"`
+=======
+	EdgeVPNToken   string      `yaml:"edgevpn_token"`
+	PublicKey      string      `yaml:"public_key"`
+	PrivateKey     string      `yaml:"private_key"`
+	DebugConfig    DebugConfig `yaml:"debug"`
+	NTPServer      string      `yaml:"ntp_server"`
+	DiscordWebhook string      `yaml:"discord_webhook"`
+	HttpPull       []string    `yaml:"http_pull"`
+>>>>>>> Stashed changes
 }
 
 type DebugConfig struct {
@@ -81,6 +91,17 @@ func findConfig(dirs []string) (Config, error) {
 		if res.PublicKey == "" && c.PublicKey != "" {
 			res.PublicKey = c.PublicKey
 		}
+<<<<<<< Updated upstream
+=======
+
+		if len(res.HttpPull) == 0 && len(c.HttpPull) > 0 {
+			res.HttpPull = c.HttpPull
+		}
+
+		if res.DiscordWebhook == "" && c.DiscordWebhook != "" {
+			res.DiscordWebhook = c.DiscordWebhook
+		}
+>>>>>>> Stashed changes
 		if c.DebugConfig.Enabled && !res.DebugConfig.Enabled {
 			res.DebugConfig.Enabled = true
 		}

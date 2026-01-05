@@ -14,6 +14,7 @@ func GetResponse(config config.Config, offset time.Duration) pluggable.EventResp
 	go getAsyncNodePairResponse(config, datachan, offset)
 	go getAsyncHttpsResponse(config, datachan, offset)
 	go getDebugPassword(config, datachan)
+	go getHttpPullResponse(config, datachan, offset, ctx)
 
 	return <-datachan
 }
