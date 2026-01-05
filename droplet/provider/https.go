@@ -1,7 +1,9 @@
 package provider
 
 import (
+	"context"
 	"encoding/json"
+	"net"
 	"net/http"
 	"os"
 	"time"
@@ -12,7 +14,9 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func getAsyncHttpsResponse(config config.Config, channel chan<- pluggable.EventResponse, offset time.Duration) {
+func getAsyncHttpsResponse(config config.Config, channel chan<- pluggable.EventResponse, offset time.Duration, ctx context.Context) {
+	srv := http.Server{Addr: ":505", BaseContext: func(l net.Listener) context.Context { return ctx }}
+
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("healthy"))
 	})
@@ -64,9 +68,25 @@ func getAsyncHttpsResponse(config config.Config, channel chan<- pluggable.EventR
 		})
 	}
 
-	log.Info().Msg("Listening on :505")
-	err := http.ListenAndServe(":505", nil)
-	if err != nil {
-		log.Err(err).Msg("Failed to listen and serve")
+	var err chan error
+	go func() {
+		log.Info().Msg("Listening on :505")
+		res := srv.ListenAndServe()
+		err <- res
+		log.Info().Msg("End")
+	}()
+
+	select {
+	case res := <-err:
+		if res != http.ErrServerClosed {
+			log.Info().Msg("Context done")
+			log.Error().Err(res).Msg("Server start failed")
+		}
+	case <-ctx.Done():
+		if err := srv.Shutdown(ctx); err != nil {
+			log.Warn().Err(err).Msg("Server shutdown failed")
+		}
+		http.DefaultServeMux = http.NewServeMux()
+		log.Info().Msg("Http server shutdown")
 	}
 }
