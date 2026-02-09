@@ -4,6 +4,7 @@ Copyright © 2026 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -62,7 +63,12 @@ var unlockServeCmd = &cobra.Command{
 			log.Fatal().Err(err).Msg("Failed to get port number")
 		}
 
-		http.HandleFunc("/get_payload", func(w http.ResponseWriter, r *http.Request) {
+		mux := http.NewServeMux()
+		srv := http.Server{
+			Addr:    fmt.Sprintf(":%d", port),
+			Handler: mux,
+		}
+		mux.HandleFunc("/get_payload", func(w http.ResponseWriter, r *http.Request) {
 			log.Info().Str("ip", r.RemoteAddr).Msg("[⚒️] Preparing payload")
 			payload, err := common.NewPayload(string(publicKey), string(privateKey), password, offset)
 			if err != nil {
@@ -79,11 +85,13 @@ var unlockServeCmd = &cobra.Command{
 			}
 
 			w.Write(payload_string)
+
+			go srv.Shutdown(context.Background())
 		})
 
 		log.Info().Int("port", port).Msg("[📋] Listening for connections")
-		err = http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
-		if err != nil {
+		err = srv.ListenAndServe()
+		if err != nil && err != http.ErrServerClosed {
 			log.Fatal().Err(err).Str("listen", fmt.Sprintf(":%d", port)).Msg("Failed to listen on port")
 		}
 

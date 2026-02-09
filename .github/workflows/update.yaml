@@ -27,7 +27,7 @@ jobs:
       - name: Fetch Alpine Version
         id: alpine
         run: |
-          echo "stdout=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://raw.githubusercontent.com/kairos-io/kairos/refs/tags/${{steps.latest.outputs.stdout}}/.github/workflows/image-master.yaml | yq '.jobs.standard.strategy.matrix.base_image[] | select(. == "alpine*")')" >> $GITHUB_OUTPUT
+          echo "stdout=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://raw.githubusercontent.com/kairos-io/kairos/refs/tags/${{steps.latest.outputs.stdout}}/.github/workflows/image-master.yaml | yq '.jobs.core.strategy.matrix.base_image[] | select(. == "alpine*")')" >> $GITHUB_OUTPUT
       - name: Fetch Dockerfile & update resulting Dockerfile
         run: |
           curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://raw.githubusercontent.com/kairos-io/kairos/refs/tags/${{steps.latest.outputs.stdout}}/images/Dockerfile > Dockerfile_kairos
@@ -87,4 +87,3 @@ jobs:
             # k3s update text
             ${{steps.latest_msg.outputs.stdout}}
           delete-branch: true
-
