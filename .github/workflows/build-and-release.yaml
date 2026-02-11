@@ -16,7 +16,7 @@ permissions:
   models: none
 env:
   BASE_IMAGE: "alpine:3.21"
-  KUBERNETES_VERSION: "v1.35.0+k3s1"
+  KUBERNETES_VERSION: "v1.35.0+k3s3"
 jobs:
   setup-version:
     runs-on: ubuntu-24.04
