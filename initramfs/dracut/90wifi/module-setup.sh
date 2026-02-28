@@ -21,12 +21,17 @@ install() {
     # Install wpa_supplicant and wpa_cli for WiFi authentication
     inst_multiple wpa_supplicant wpa_cli
 
+    # Install Alpine's OpenSSL compat libs needed by wpa_supplicant (EVP_rc4/EVP_md4)
+    inst_simple -o /usr/lib/wpa-compat/libcrypto.so.3
+    inst_simple -o /usr/lib/wpa-compat/libssl.so.3
+
     # Install the WiFi start/stop scripts
     inst_simple /usr/sbin/initramfs-start-wifi.sh
     inst_simple /usr/sbin/initramfs-stop-wifi.sh
 
-    # Install udhcpc for DHCP lease in initramfs
+    # Install udhcpc for DHCP lease in initramfs (busybox applet copy)
     inst_multiple -o udhcpc
+    inst_simple -o /usr/share/udhcpc/default.script
 
     # Install additional firmware for Raspberry Pi 4 (if available)
     for fw in \

@@ -10,8 +10,9 @@ RUN go build -o kairos-re-unlock ./droplet/main.go
 FROM alpine:3.21 AS alpine-deps
 RUN apk add --no-cache wpa_supplicant wireguard-tools htop tcpdump
 # Prepare exports: binaries + all shared library dependencies
+# Note: Alpine paths differ from FHS — wpa_supplicant/wpa_cli at /sbin/, tcpdump at /usr/bin/
 RUN mkdir -p /export && \
-    for bin in /usr/sbin/wpa_supplicant /usr/sbin/wpa_cli /usr/bin/wg /usr/bin/htop /usr/sbin/tcpdump; do \
+    for bin in /sbin/wpa_supplicant /sbin/wpa_cli /usr/bin/wg /usr/bin/htop /usr/bin/tcpdump; do \
         dir="/export$(dirname $bin)" && mkdir -p "$dir" && cp "$bin" "$dir/"; \
         ldd "$bin" 2>/dev/null | awk '/=>/{print $3}' | while read lib; do \
             if [ -n "$lib" ] && [ -f "$lib" ]; then \
@@ -19,16 +20,28 @@ RUN mkdir -p /export && \
             fi; \
         done; \
     done && \
-    mkdir -p /export/usr/bin && cp /usr/bin/wg-quick /export/usr/bin/
+    mkdir -p /export/usr/bin && cp /usr/bin/wg-quick /export/usr/bin/ && \
+    mkdir -p /export/sbin && cp /bin/busybox /export/sbin/udhcpc && \
+    mkdir -p /export/usr/share/udhcpc && cp /usr/share/udhcpc/default.script /export/usr/share/udhcpc/ && \
+    mkdir -p /export/usr/lib/wpa-compat && \
+    cp /usr/lib/libcrypto.so.3 /export/usr/lib/wpa-compat/ && \
+    cp /usr/lib/libssl.so.3 /export/usr/lib/wpa-compat/
 
-FROM base-kairos as discovery-installed
+FROM base-kairos AS discovery-installed
 # Install WiFi and networking tools from Alpine (musl-compatible with Hadron)
 # Use rsync --ignore-existing to avoid overwriting Hadron's own system libraries
+# Alpine's OpenSSL is placed in /usr/lib/wpa-compat/ to avoid conflicting with Hadron's OpenSSL
+# (wpa_supplicant needs EVP_rc4/EVP_md4 from Alpine's OpenSSL 3.3, not available in Hadron's 3.6)
 RUN --mount=from=alpine-deps,src=/export,dst=/alpine-export \
     rsync -a --ignore-existing /alpine-export/ /
 
-# Verify that wpa_supplicant works correctly after installation
-RUN wpa_supplicant -v
+# Create musl soname symlink for dracut-install compatibility:
+# Alpine binaries have NEEDED: libc.musl-x86_64.so.1, but Hadron installs musl as /usr/lib/libc.so
+RUN ln -sf /lib/ld-musl-x86_64.so.1 /usr/lib/libc.musl-x86_64.so.1 || \
+    ln -sf /lib/ld-musl-aarch64.so.1 /usr/lib/libc.musl-aarch64.so.1 || true
+
+# Verify that wpa_supplicant (with Alpine's OpenSSL) and udhcpc work correctly
+RUN LD_LIBRARY_PATH=/usr/lib/wpa-compat wpa_supplicant -v && udhcpc --help 2>&1 | head -1
 
 # Setup initrd WiFi using dracut
 # - Create a custom dracut module for WiFi support in initramfs
@@ -36,6 +49,7 @@ RUN wpa_supplicant -v
 # - Add hook to start WiFi during initramfs boot
 COPY --chmod=755 ./initramfs/initramfs-* /usr/sbin/
 COPY --chmod=755 ./initramfs/dracut/90wifi/ /usr/lib/dracut/modules.d/90wifi/
+RUN mkdir -p /etc/dracut.conf.d
 COPY ./initramfs/dracut/wifi.conf /etc/dracut.conf.d/wifi.conf
 
 # Rebuild initramfs with dracut including WiFi support
@@ -47,6 +61,9 @@ COPY --chmod=644 ./system-oem/ /system/oem/
 # Install discovery
 RUN rm -f /system/discovery/kcrypt-discovery-challenger
 COPY --from=builder /workdir/kairos-re-unlock /system/discovery/kcrypt-discovery-re-unlock
+
+# Install wg-quick@.service systemd unit template (not included in Alpine's wireguard-tools)
+COPY --chmod=644 ./system-files/wg-quick@.service /usr/lib/systemd/system/wg-quick@.service
 
 # Configure WireGuard with systemd (replaces OpenRC setup)
 # Sysctl settings are applied automatically on boot by systemd-sysctl.service
