@@ -91,7 +91,7 @@ The build & upgrade process of the image is automated. (using github actions)
 - Initramfs WiFi support uses a custom dracut module (replacing Alpine's mkinitfs)
 - WireGuard is managed via systemd (replacing Alpine's OpenRC)
 ### Upgrade
-- The upgrade process pulls the current versions from the main karios repo and hadron repo and applies them to the github action
+- The upgrade process pulls the current versions from the main kairos repo and hadron repo and applies them to the github action
 - also the factory action is automatically updated
 - the current kubernetes version is directly from k3s github repo
 - **WARNING:** only this action will merge the Dockerfile_ext and base file for the new docker file. Before running build, after modifiying the dockerfile, you should run this action

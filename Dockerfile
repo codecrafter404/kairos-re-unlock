@@ -80,6 +80,7 @@ RUN rm -f /system/discovery/kcrypt-discovery-challenger
 COPY --from=builder /workdir/kairos-re-unlock /system/discovery/kcrypt-discovery-re-unlock
 
 # Configure WireGuard with systemd (replaces OpenRC setup)
+# Sysctl settings are applied automatically on boot by systemd-sysctl.service
 RUN echo 'net.ipv4.ip_forward = 1' >> /etc/sysctl.d/99-wireguard.conf && \
     echo 'net.ipv6.conf.all.forwarding = 1' >> /etc/sysctl.d/99-wireguard.conf && \
     echo 'net.ipv6.conf.default.forwarding = 1' >> /etc/sysctl.d/99-wireguard.conf && \
