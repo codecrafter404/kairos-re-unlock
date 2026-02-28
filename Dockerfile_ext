@@ -36,9 +36,10 @@ RUN --mount=from=alpine-deps,src=/export,dst=/alpine-export \
     rsync -a --ignore-existing /alpine-export/ /
 
 # Create musl soname symlink for dracut-install compatibility:
-# Alpine binaries have NEEDED: libc.musl-x86_64.so.1, but Hadron installs musl as /usr/lib/libc.so
-RUN ln -sf /lib/ld-musl-x86_64.so.1 /usr/lib/libc.musl-x86_64.so.1 || \
-    ln -sf /lib/ld-musl-aarch64.so.1 /usr/lib/libc.musl-aarch64.so.1 || true
+# Alpine binaries have NEEDED: libc.musl-<arch>.so.1, but Hadron installs musl as /usr/lib/libc.so
+RUN ARCH=$(uname -m) && \
+    ln -sf /lib/ld-musl-${ARCH}.so.1 /usr/lib/libc.musl-${ARCH}.so.1 && \
+    echo "Created musl compat symlink for ${ARCH}"
 
 # Verify that wpa_supplicant (with Alpine's OpenSSL) and udhcpc work correctly
 RUN LD_LIBRARY_PATH=/usr/lib/wpa-compat wpa_supplicant -v && udhcpc --help 2>&1 | head -1
