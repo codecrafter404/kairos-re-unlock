@@ -12,7 +12,7 @@ find_interface () {
 }
 
 enable () {
-	/sbin/wpa_supplicant -i "$INTERFACE" -c "$CONFIG" -P /run/initram-wpa_supplicant.pid -B -d
+	wpa_supplicant -i "$INTERFACE" -c "$CONFIG" -P /run/initram-wpa_supplicant.pid -B -d
 
 	echo -n "Connecting to wifi network"
 	while [ "$CONNECT_TIMEOUT" -ge 0 ]

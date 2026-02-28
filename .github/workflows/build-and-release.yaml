@@ -15,7 +15,7 @@ permissions:
   security-events: write
   models: none
 env:
-  BASE_IMAGE: "alpine:3.21"
+  BASE_IMAGE: "ghcr.io/kairos-io/hadron:v0.0.3"
   KUBERNETES_VERSION: "v1.35.0+k3s3"
 jobs:
   setup-version:
@@ -82,7 +82,7 @@ jobs:
       # registry
       registry_domain: ghcr.io
       registry_namespace: codecrafter404
-      registry_repository: alpine-reunlock-$ARCH-$MODEL
+      registry_repository: hadron-reunlock-$ARCH-$MODEL
       custom_tag_format: $VERSION
       image_labels: "org.opencontainers.image.source=https://github.com/codecrafter404/kairos-re-unlock"
   build-rpi:
@@ -105,7 +105,7 @@ jobs:
       # registry
       registry_domain: ghcr.io
       registry_namespace: codecrafter404
-      registry_repository: alpine-reunlock-$ARCH-$MODEL
+      registry_repository: hadron-reunlock-$ARCH-$MODEL
       custom_tag_format: $VERSION
       image_labels: "org.opencontainers.image.source=https://github.com/codecrafter404/kairos-re-unlock"
   release:

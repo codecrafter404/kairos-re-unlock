@@ -8,11 +8,11 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - name: Get latest
+      - name: Get latest Kairos release
         id: latest
         run: |
           echo "stdout=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/kairos-io/kairos/releases/latest | yq -r .tag_name)" >> $GITHUB_OUTPUT
-      - name: Get latest
+      - name: Get latest Kairos release notes
         id: latest_msg
         run: |
           {
@@ -24,10 +24,10 @@ jobs:
         id: workflow
         run: |
           echo "stdout=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://raw.githubusercontent.com/kairos-io/kairos/refs/tags/${{steps.latest.outputs.stdout}}/.github/workflows/image-master.yaml | yq -r .jobs.standard.uses)" >> $GITHUB_OUTPUT
-      - name: Fetch Alpine Version
-        id: alpine
+      - name: Get latest Hadron release
+        id: hadron
         run: |
-          echo "stdout=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://raw.githubusercontent.com/kairos-io/kairos/refs/tags/${{steps.latest.outputs.stdout}}/.github/workflows/image-master.yaml | yq '.jobs.core.strategy.matrix.base_image[] | select(. == "alpine*")')" >> $GITHUB_OUTPUT
+          echo "stdout=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/kairos-io/hadron/releases/latest | yq -r .tag_name)" >> $GITHUB_OUTPUT
       - name: Fetch Dockerfile & update resulting Dockerfile
         run: |
           curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://raw.githubusercontent.com/kairos-io/kairos/refs/tags/${{steps.latest.outputs.stdout}}/images/Dockerfile > Dockerfile_kairos
@@ -39,7 +39,7 @@ jobs:
         run: |
           yq -i '.jobs.build-amd64.uses = "${{steps.workflow.outputs.stdout}}"' ./.github/workflows/build-and-release.yaml
           yq -i '.jobs.build-rpi.uses = "${{steps.workflow.outputs.stdout}}"' ./.github/workflows/build-and-release.yaml
-          yq -i '.env.BASE_IMAGE = "${{steps.alpine.outputs.stdout}}"' ./.github/workflows/build-and-release.yaml
+          yq -i '.env.BASE_IMAGE = "ghcr.io/kairos-io/hadron:${{steps.hadron.outputs.stdout}}"' ./.github/workflows/build-and-release.yaml
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
         with:
@@ -49,7 +49,7 @@ jobs:
           title: Update Kairos to ${{steps.latest.outputs.stdout}}
           body: |
             # General
-            - Alpine Version: `${{steps.alpine.outputs.stdout}}`
+            - Hadron Version: `${{steps.hadron.outputs.stdout}}`
             - Kairos Version: `${{steps.latest.outputs.stdout}}`
             - Kairos Workflow: `${{steps.workflow.outputs.stdout}}`
             # Kairos update text
