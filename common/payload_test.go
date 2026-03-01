@@ -136,7 +136,7 @@ func TestPayload_Valid_FutureTimestamp(t *testing.T) {
 
 	password := "test-password"
 
-	// Create payload with future timestamp (> 0 offset just past grace period)
+	// Create payload with future timestamp (20 min, well past the 15 min grace period)
 	payload, err := NewPayload(dropletPub, clientPriv, password, 20*time.Minute)
 	if err != nil {
 		t.Fatalf("NewPayload failed: %v", err)

@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/codecrafter404/kairos-re-unlock/droplet/config"
@@ -38,7 +39,7 @@ func TestValidatePassword_LUKS_Integration(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to setup loop device: %v", err)
 	}
-	loopDev := string(out[:len(out)-1]) // trim newline
+	loopDev := strings.TrimSpace(string(out))
 	t.Cleanup(func() {
 		exec.Command("losetup", "-d", loopDev).Run()
 	})
