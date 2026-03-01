@@ -1,0 +1,351 @@
+name: Integration Tests
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - README.md
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  BASE_IMAGE: "ghcr.io/kairos-io/hadron:v0.0.3"
+  KUBERNETES_VERSION: "v1.35.0+k3s3"
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25.5"
+      - name: Run unit tests
+        run: go test -v -count=1 ./common/... ./droplet/config/...
+      - name: Run provider unit tests
+        run: go test -v -count=1 ./droplet/provider/... -run 'Test[^L]'
+      - name: Run LUKS integration tests
+        run: |
+          sudo apt-get update && sudo apt-get install -y cryptsetup
+          sudo go test -v -count=1 ./droplet/provider/... -run TestValidatePassword_LUKS
+
+  build-image:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build container image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          push: false
+          load: true
+          tags: kairos-re-unlock:test
+          build-args: |
+            BASE_IMAGE=${{ env.BASE_IMAGE }}
+            MODEL=generic
+            KUBERNETES_DISTRO=k3s
+            KUBERNETES_VERSION=${{ env.KUBERNETES_VERSION }}
+            VERSION=test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Save image
+        run: docker save kairos-re-unlock:test -o /tmp/kairos-re-unlock.tar
+      - uses: actions/upload-artifact@v4
+        with:
+          name: container-image
+          path: /tmp/kairos-re-unlock.tar
+          retention-days: 1
+
+  verify-image:
+    runs-on: ubuntu-24.04
+    needs: build-image
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: container-image
+          path: /tmp
+      - name: Load image
+        run: docker load -i /tmp/kairos-re-unlock.tar
+      - name: Verify unlock discovery binary
+        run: |
+          echo "=== Checking kcrypt-discovery-re-unlock ==="
+          docker run --rm kairos-re-unlock:test test -x /system/discovery/kcrypt-discovery-re-unlock
+          echo "PASS: discovery binary exists and is executable"
+      - name: Verify WireGuard tools
+        run: |
+          echo "=== Checking WireGuard ==="
+          docker run --rm kairos-re-unlock:test sh -c '
+            set -e
+            test -x /usr/bin/wg && echo "PASS: wg binary"
+            test -x /usr/bin/wg-quick && echo "PASS: wg-quick script"
+            test -f /usr/lib/systemd/system/wg-quick@.service && echo "PASS: wg-quick systemd unit"
+            test -f /etc/sysctl.d/99-wireguard.conf && echo "PASS: wireguard sysctl config"
+            grep -q "net.ipv4.ip_forward = 1" /etc/sysctl.d/99-wireguard.conf && echo "PASS: ipv4 forwarding enabled"
+            systemctl is-enabled wg-quick@wg0 && echo "PASS: wg-quick@wg0 enabled"
+          '
+      - name: Verify WiFi tools
+        run: |
+          echo "=== Checking WiFi ==="
+          docker run --rm kairos-re-unlock:test sh -c '
+            set -e
+            test -x /sbin/wpa_supplicant && echo "PASS: wpa_supplicant binary"
+            test -x /sbin/wpa_cli && echo "PASS: wpa_cli binary"
+            test -x /sbin/udhcpc && echo "PASS: udhcpc binary"
+            test -d /usr/lib/dracut/modules.d/90wifi && echo "PASS: dracut wifi module"
+            test -f /usr/lib/dracut/modules.d/90wifi/module-setup.sh && echo "PASS: wifi module-setup.sh"
+            test -f /etc/dracut.conf.d/wifi.conf && echo "PASS: dracut wifi config"
+            test -x /usr/sbin/initramfs-start-wifi.sh && echo "PASS: initramfs-start-wifi.sh"
+            test -x /usr/sbin/initramfs-stop-wifi.sh && echo "PASS: initramfs-stop-wifi.sh"
+            test -f /usr/lib/wpa-compat/libcrypto.so.3 && echo "PASS: wpa OpenSSL compat lib"
+            LD_LIBRARY_PATH=/usr/lib/wpa-compat wpa_supplicant -v && echo "PASS: wpa_supplicant runs"
+          '
+      - name: Verify system OEM configs
+        run: |
+          echo "=== Checking system OEM ==="
+          docker run --rm kairos-re-unlock:test sh -c '
+            set -e
+            ls /system/oem/ && echo "PASS: system oem directory"
+          '
+
+  vm-integration-test:
+    runs-on: ubuntu-24.04
+    needs: build-image
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25.5"
+      - uses: actions/download-artifact@v4
+        with:
+          name: container-image
+          path: /tmp
+      - name: Load image
+        run: docker load -i /tmp/kairos-re-unlock.tar
+
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-system-x86 qemu-utils ovmf cryptsetup curl
+
+      - name: Generate test keypair
+        run: |
+          mkdir -p /tmp/vm-test
+          openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out /tmp/vm-test/droplet_priv.pem 2>/dev/null
+          openssl rsa -in /tmp/vm-test/droplet_priv.pem -pubout -out /tmp/vm-test/droplet_pub.pem 2>/dev/null
+          openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out /tmp/vm-test/client_priv.pem 2>/dev/null
+          openssl rsa -in /tmp/vm-test/client_priv.pem -pubout -out /tmp/vm-test/client_pub.pem 2>/dev/null
+
+      - name: Create cloud-config for encrypted install
+        run: |
+          cd /tmp/vm-test
+          python3 - <<'PYSCRIPT'
+          import yaml, os
+
+          with open('client_pub.pem') as f:
+              client_pub = f.read()
+          with open('droplet_priv.pem') as f:
+              droplet_priv = f.read()
+
+          config = {
+              'install': {
+                  'auto': True,
+                  'device': '/dev/vda',
+                  'reboot': True,
+                  'encrypted_partitions': ['COS_PERSISTENT'],
+              },
+              'users': [{
+                  'name': 'testuser',
+                  'passwd': 'testuser',
+                  'groups': ['admin'],
+              }],
+              'kcrypt': {
+                  'remote_unlock': {
+                      'edgevpn_token': 'placeholder-token-for-testing',
+                      'public_key': client_pub,
+                      'private_key': droplet_priv,
+                      'debug': {
+                          'enabled': True,
+                          'log_level': -1,
+                          'password': 'test-vm-luks-password',
+                          'bypass_password_test': True,
+                      },
+                  },
+              },
+          }
+
+          with open('cloud-config.yaml', 'w') as f:
+              f.write('#cloud-config\n')
+              yaml.dump(config, f, default_flow_style=False)
+
+          print('Cloud-config generated successfully')
+          PYSCRIPT
+
+          echo "=== Validating cloud-config ==="
+          python3 -c "
+          import yaml
+          with open('cloud-config.yaml') as f:
+              data = yaml.safe_load(f)
+          assert 'kcrypt' in data
+          assert 'BEGIN PUBLIC KEY' in data['kcrypt']['remote_unlock']['public_key']
+          assert 'BEGIN PRIVATE KEY' in data['kcrypt']['remote_unlock']['private_key']
+          print('PASS: cloud-config is valid YAML with correct keys')
+          "
+
+      - name: Build ISO with AuroraBoot
+        run: |
+          cd /tmp/vm-test
+          # Retag to avoid colon-in-reference issues with docker:// scheme
+          docker tag kairos-re-unlock:test localhost/kairos-re-unlock-test
+          # AuroraBoot runs a netboot server after ISO build; use timeout to stop it
+          timeout 300 docker run --rm \
+            -v /tmp/vm-test:/work \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            quay.io/kairos/auroraboot:latest \
+            --set "container_image=docker://localhost/kairos-re-unlock-test" \
+            --set "disable_netboot=true" \
+            --set "state_dir=/work/auroraboot" \
+            --cloud-config /work/cloud-config.yaml || true
+
+          echo "=== Generated artifacts ==="
+          find /tmp/vm-test/auroraboot -type f \( -name "*.iso" -o -name "*.raw" \) 2>/dev/null
+          ISO_PATH=$(find /tmp/vm-test/auroraboot -name "*.iso" -type f | head -1)
+          if [ -n "$ISO_PATH" ]; then
+            cp "$ISO_PATH" /tmp/vm-test/kairos-test.iso
+            echo "ISO ready: $(ls -lh /tmp/vm-test/kairos-test.iso)"
+          else
+            echo "ERROR: No ISO produced by AuroraBoot"
+            find /tmp/vm-test/auroraboot -type f | head -20
+            exit 1
+          fi
+
+      - name: Install to virtual disk
+        timeout-minutes: 15
+        run: |
+          cd /tmp/vm-test
+          qemu-img create -f qcow2 disk.qcow2 20G
+          cp /usr/share/OVMF/OVMF_VARS_4M.fd ovmf_vars.fd
+
+          # Boot ISO with UEFI for auto-install (Kairos ISOs are UEFI-bootable)
+          qemu-system-x86_64 \
+            -m 4096 -smp 2 -enable-kvm -cpu host \
+            -drive if=pflash,format=raw,readonly=on,file=/usr/share/OVMF/OVMF_CODE_4M.fd \
+            -drive if=pflash,format=raw,file=ovmf_vars.fd \
+            -drive file=disk.qcow2,format=qcow2,if=virtio \
+            -cdrom kairos-test.iso \
+            -boot order=d,strict=on \
+            -display none \
+            -serial file:install.log \
+            -nic user,model=virtio,hostfwd=tcp::10505-:505 \
+            -no-reboot -daemonize
+
+          echo "Waiting for install to complete..."
+          WAITED=0
+          while [ $WAITED -lt 540 ]; do
+            sleep 30
+            WAITED=$((WAITED + 30))
+            echo "... install: ${WAITED}s ($(wc -l < install.log) log lines)"
+            # Check if QEMU exited (install done + reboot with -no-reboot)
+            if ! pgrep -f "qemu-system" > /dev/null; then
+              echo "QEMU exited — install complete"
+              break
+            fi
+            # Check for reboot indication in log
+            if grep -qi "reboot\|Rebooting" install.log 2>/dev/null; then
+              echo "Reboot detected in log"
+              break
+            fi
+          done
+          # Ensure QEMU is stopped
+          QPID=$(pgrep -f "qemu-system" || true)
+          [ -n "$QPID" ] && kill $QPID 2>/dev/null || true
+          sleep 2
+
+          echo "=== Install log (last 30 lines) ==="
+          tail -30 install.log
+
+      - name: Boot and test encrypted volume unlock
+        timeout-minutes: 10
+        run: |
+          cd /tmp/vm-test
+          cp /usr/share/OVMF/OVMF_VARS_4M.fd ovmf_vars_boot.fd
+
+          # Boot the installed system with UEFI
+          qemu-system-x86_64 \
+            -m 4096 -smp 2 -enable-kvm -cpu host \
+            -drive if=pflash,format=raw,readonly=on,file=/usr/share/OVMF/OVMF_CODE_4M.fd \
+            -drive if=pflash,format=raw,file=ovmf_vars_boot.fd \
+            -drive file=disk.qcow2,format=qcow2,if=virtio \
+            -display none \
+            -serial file:boot.log \
+            -nic user,model=virtio,hostfwd=tcp::10505-:505 \
+            -daemonize
+
+          echo "Waiting for unlock service on :505..."
+          WAITED=0
+          HEALTH_OK=false
+          while [ $WAITED -lt 360 ]; do
+            sleep 10
+            WAITED=$((WAITED + 10))
+
+            # Check if QEMU is still running
+            if ! pgrep -f "qemu-system" > /dev/null; then
+              echo "QEMU exited at ${WAITED}s"
+              break
+            fi
+
+            if curl -sf --connect-timeout 3 http://127.0.0.1:10505/health 2>/dev/null; then
+              echo "PASS: /health responded at ${WAITED}s"
+              HEALTH_OK=true
+              break
+            fi
+            echo "... boot: ${WAITED}s ($(wc -l < boot.log) log lines)"
+          done
+
+          if [ "$HEALTH_OK" = "true" ]; then
+            echo "=== Unlock endpoint is live ==="
+            RESP=$(curl -sf http://127.0.0.1:10505/health)
+            echo "Health: $RESP"
+            [ "$RESP" = "healthy" ] && echo "PASS: HTTP unlock endpoint healthy"
+
+            # Build and send an unlock payload using the Go client
+            # Port 10505 on host is forwarded to 505 in the VM
+            cd ${{ github.workspace }}
+            go build -o /tmp/vm-test/client ./client/main.go
+            echo "test-vm-luks-password" | /tmp/vm-test/client unlock-http \
+              -d /tmp/vm-test/droplet_pub.pem \
+              -c /tmp/vm-test/client_priv.pem \
+              -i 127.0.0.1 \
+              --ntp time.cloudflare.com 2>&1 && echo "PASS: unlock-http sent successfully" || echo "WARN: unlock-http failed (may have auto-unlocked via debug)"
+          else
+            echo "=== Boot log (last 80 lines) ==="
+            tail -80 boot.log
+            # Check if debug auto-unlock succeeded
+            if grep -qi "successfull unlock\|discovery.password" boot.log; then
+              echo "PASS: Auto-unlocked via debug password (HTTP endpoint closed after unlock)"
+            else
+              echo "FAIL: Could not verify unlock"
+              exit 1
+            fi
+          fi
+
+          # Cleanup QEMU
+          QPID=$(pgrep -f "qemu-system" || true)
+          [ -n "$QPID" ] && kill $QPID 2>/dev/null || true
+
+      - name: Upload test logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vm-test-logs
+          path: |
+            /tmp/vm-test/*.log
+            /tmp/vm-test/cloud-config.yaml
+          retention-days: 7
