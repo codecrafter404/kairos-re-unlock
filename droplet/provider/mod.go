@@ -49,7 +49,7 @@ func validatePassword(event pluggable.EventResponse, conf config.Config, stdin [
 	input_pipe, err := cmd.StdinPipe()
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to open stdin pipe")
-
+		return false
 	}
 
 	go func() {

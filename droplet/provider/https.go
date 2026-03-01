@@ -68,22 +68,24 @@ func getAsyncHttpsResponse(config config.Config, channel chan<- pluggable.EventR
 		})
 	}
 
-	var err chan error
+	errCh := make(chan error, 1)
 	go func() {
 		log.Info().Msg("Listening on :505")
 		res := srv.ListenAndServe()
-		err <- res
+		errCh <- res
 		log.Info().Msg("End")
 	}()
 
 	select {
-	case res := <-err:
+	case res := <-errCh:
 		if res != http.ErrServerClosed {
 			log.Info().Msg("Context done")
 			log.Error().Err(res).Msg("Server start failed")
 		}
 	case <-ctx.Done():
-		if err := srv.Shutdown(ctx); err != nil {
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := srv.Shutdown(shutdownCtx); err != nil {
 			log.Warn().Err(err).Msg("Server shutdown failed")
 		}
 		http.DefaultServeMux = http.NewServeMux()
