@@ -3,6 +3,9 @@ INTERFACE="wlan0"
 CONFIG="/tmp/mnt/OEM/wpa.conf"
 CONNECT_TIMEOUT=30
 
+# Alpine's wpa_supplicant needs OpenSSL from /usr/lib/wpa-compat (EVP_rc4/EVP_md4)
+export LD_LIBRARY_PATH=/usr/lib/wpa-compat${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+
 find_interface () {
     for interface in /sys/class/net/*; do
 	if [ -d "$interface/wireless" ]; then
@@ -12,7 +15,7 @@ find_interface () {
 }
 
 enable () {
-	/sbin/wpa_supplicant -i "$INTERFACE" -c "$CONFIG" -P /run/initram-wpa_supplicant.pid -B -d
+	wpa_supplicant -i "$INTERFACE" -c "$CONFIG" -P /run/initram-wpa_supplicant.pid -B -d
 
 	echo -n "Connecting to wifi network"
 	while [ "$CONNECT_TIMEOUT" -ge 0 ]

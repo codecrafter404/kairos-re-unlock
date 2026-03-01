@@ -1,5 +1,5 @@
 # Kairos-Remote-Unlock
-This custom alpine flavour enables remote unlocking of the luks encrypted partitions. It allows connectivity over wifi. It mainly receives the password through two channels:
+This custom [Hadron](https://github.com/kairos-io/hadron) flavour enables remote unlocking of the luks encrypted partitions. It allows connectivity over wifi. It mainly receives the password through two channels:
 - Http: an http request to the server on port `:505`
 - Using kairos nodepair based on P2P -> sometimes really unreliable
 
@@ -86,8 +86,12 @@ The build & upgrade process of the image is automated. (using github actions)
 ### Building
 - the build process is automated for arm (raspberry pi) and x86 maschines
 - It utilizes the kairos factory action
+- The base image is [Hadron Linux](https://github.com/kairos-io/hadron), a minimal musl-based distro with systemd
+- WiFi and networking tools are sourced from Alpine packages (musl-compatible) in a multi-stage Docker build
+- Initramfs WiFi support uses a custom dracut module (replacing Alpine's mkinitfs)
+- WireGuard is managed via systemd (replacing Alpine's OpenRC)
 ### Upgrade
-- The upgrade process pulls the current versions from the main karios repo and applies them to the github action
+- The upgrade process pulls the current versions from the main kairos repo and hadron repo and applies them to the github action
 - also the factory action is automatically updated
 - the current kubernetes version is directly from k3s github repo
 - **WARNING:** only this action will merge the Dockerfile_ext and base file for the new docker file. Before running build, after modifiying the dockerfile, you should run this action
