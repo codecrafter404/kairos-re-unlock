@@ -41,7 +41,7 @@ type ConfigContainer struct {
 	}
 }
 
-var configDirs = []string{"/oem", "/sysroot/oem", "/tmp/oem"}
+var configDirs = []string{"/etc/reunlock", "/oem", "/sysroot/oem", "/tmp/oem"}
 
 func UnmarshalConfig() (Config, error) {
 	conf, err := findConfig(configDirs)

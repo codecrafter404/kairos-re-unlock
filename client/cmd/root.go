@@ -12,11 +12,11 @@ import (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "reunlock-cli",
-	Short: "KairosReUnlock cli",
+	Short: "NixOS Remote Unlock cli",
 	Long: `This is a companion cli to
 - generate an EdgeVPN token
 - remotely unlock the device
-on a Kairos based distribution with KairosReUnlock added`,
+on a NixOS system with remote-unlock configured`,
 }
 
 func Execute() {

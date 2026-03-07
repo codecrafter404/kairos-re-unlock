@@ -15,7 +15,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-const LOGFILE = "/tmp/kcrypt-kairos-re-unlock.log"
+const LOGFILE = "/tmp/re-unlock.log"
 
 func main() {
 	if err := os.RemoveAll(LOGFILE); err != nil {
@@ -85,6 +85,17 @@ func main() {
 			log.Fatal().Err(err).Msg("Failed to read from stdin")
 		}
 		checkErr(droplet.Start(config, ntp_offset, input))
+		os.Exit(0)
+	}
+
+	if len(os.Args) >= 2 && os.Args[1] == "unlock" {
+		device := ""
+		if len(os.Args) >= 3 {
+			device = os.Args[2]
+		}
+		password, err := droplet.StartUnlock(config, ntp_offset, device)
+		checkErr(err)
+		fmt.Print(password)
 		os.Exit(0)
 	}
 

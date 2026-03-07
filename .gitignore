@@ -3,3 +3,6 @@
 kairos-re-unlock
 build
 qemu
+result
+result-*
+.direnv
