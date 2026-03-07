@@ -21,10 +21,10 @@
             version = self.shortRev or self.dirtyShortRev or "dev";
             src = ./.;
             subPackages = [ "droplet" ];
-            # To get the correct hash, run:
+            # After the first build, replace this placeholder with the real hash
+            # printed by the failed build. For example:
             #   nix build .#re-unlock-droplet 2>&1 | grep 'got:'
-            # and replace the value below.
-            vendorHash = null;
+            vendorHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
             CGO_ENABLED = 0;
             postInstall = ''
               mv $out/bin/droplet $out/bin/re-unlock-droplet
@@ -40,7 +40,8 @@
             version = self.shortRev or self.dirtyShortRev or "dev";
             src = ./.;
             subPackages = [ "client" ];
-            vendorHash = null;
+            # Same as above – update after first build.
+            vendorHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
             CGO_ENABLED = 0;
             postInstall = ''
               mv $out/bin/client $out/bin/re-unlock-cli

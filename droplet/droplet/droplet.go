@@ -99,7 +99,7 @@ func StartUnlock(config config.Config, offset time.Duration, device string) (str
 	}
 
 	w.Close()
-	io.ReadAll(r)
+	_, _ = io.ReadAll(r) // drain pipe; errors are non-fatal
 	os.Stdout = old
 
 	notify.SendNotification("successful unlock", config)

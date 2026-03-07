@@ -140,7 +140,7 @@ in
     boot.initrd.network.postCommands = lib.mkAfter ''
       # Run remote unlock droplet and write password for LUKS
       mkdir -p /crypt-ramfs
-      ${dropletPkg}/bin/re-unlock-droplet unlock ${lib.optionalString (cfg.luksDevice != null) cfg.luksDevice} > /crypt-ramfs/passphrase &
+      ${dropletPkg}/bin/re-unlock-droplet unlock ${lib.optionalString (cfg.luksDevice != null) cfg.luksDevice} > /crypt-ramfs/passphrase 2>/tmp/re-unlock-initrd.log &
     '';
 
     # WireGuard
