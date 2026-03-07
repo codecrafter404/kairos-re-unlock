@@ -57,7 +57,7 @@ func getAsyncHttpsResponse(config config.Config, channel chan<- pluggable.EventR
 
 	if config.IsDebugEnabled() {
 		http.HandleFunc("/logs", func(w http.ResponseWriter, r *http.Request) {
-			logs, err := os.ReadFile("/tmp/kcrypt-kairos-re-unlock.log")
+			logs, err := os.ReadFile("/tmp/re-unlock.log")
 			if err != nil {
 				w.Write([]byte("Failed read logs"))
 				log.Err(err).Msg("Failed to read logs")

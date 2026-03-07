@@ -4,13 +4,13 @@ go 1.25.5
 
 require (
 	github.com/codecrafter404/go-nodepair v0.4.1
+	github.com/disgoorg/disgo v0.18.16
 	github.com/mudler/go-pluggable v0.0.0-20230126220627-7710299a0ae5
 	github.com/rs/zerolog v1.34.0
 	github.com/spf13/cobra v1.10.2
 )
 
 require (
-	github.com/disgoorg/disgo v0.18.16 // indirect
 	github.com/disgoorg/json v1.2.0 // indirect
 	github.com/disgoorg/snowflake/v2 v2.0.3 // indirect
 	github.com/sasha-s/go-csync v0.0.0-20240107134140-fcbab37b09ad // indirect
@@ -159,7 +159,6 @@ require (
 )
 
 require (
-	github.com/kairos-io/kcrypt v0.15.0
 	github.com/pkg/errors v0.9.1 // indirect
 	golang.org/x/sys v0.39.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1

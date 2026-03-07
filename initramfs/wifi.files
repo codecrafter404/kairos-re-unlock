@@ -1,4 +1,0 @@
-/sbin/wpa_supplicant
-/sbin/wpa_cli
-/usr/sbin/initramfs-start-wifi.sh
-/usr/sbin/initramfs-stop-wifi.sh

@@ -1,93 +1,183 @@
-# Kairos-Remote-Unlock
-This custom alpine flavour enables remote unlocking of the luks encrypted partitions. It allows connectivity over wifi. It mainly receives the password through two channels:
-- Http: an http request to the server on port `:505`
-- Using kairos nodepair based on P2P -> sometimes really unreliable
+# NixOS Remote Unlock
 
-For my private usage the wifi functionallity only works on some firmware, which is automatically included into the modules in `kernel/net/wireless` and `kernel/drivers/net/wireless`. Furthermore it includes the `brcmfmac43455-sdio.raspberrypi,4-model-b` firmware for the raspberry pi 4b.
+Remotely unlock LUKS-encrypted partitions on a NixOS system. The service provides network connectivity during early boot (initrd) and receives the decryption password through multiple channels:
 
+- **HTTP** – POST to the droplet on port `:505`
+- **P2P** – EdgeVPN / go-nodepair based peer-to-peer transport
+- **HTTP Pull** – the droplet polls a remote server for the payload
 
-The wifi will automatically turned off after initramfs in order for the main system to allow for wifi connectivity there.
+An optional WiFi configuration lets you unlock machines that are only reachable over wireless.
 
+The project also ships WireGuard support and Discord webhook notifications.
 
-The image also includes wireguard.
-## How to add a wifi connectivity
-For initial wifi connectivity during initramfs (during decryption), just put a `wpa.conf` in `/oem/wpa.conf`. It can be generated using:
+## Quick start (NixOS flake)
+
+Add this repository as a flake input and import the module:
+
+```nix
+# flake.nix
+{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
+    remote-unlock.url = "github:codecrafter404/kairos-re-unlock";
+  };
+
+  outputs = { nixpkgs, remote-unlock, ... }: {
+    nixosConfigurations.myhost = nixpkgs.lib.nixosSystem {
+      system = "x86_64-linux";
+      modules = [
+        remote-unlock.nixosModules.default
+        ./configuration.nix
+      ];
+    };
+  };
+}
+```
+
+Then enable the service in your `configuration.nix`:
+
+```nix
+services.remote-unlock = {
+  enable = true;
+  edgevpnToken = "b3RwOg...==";
+  publicKey = builtins.readFile ./keys/client_pub.pem;
+  privateKey = builtins.readFile ./keys/droplet_priv.pem;
+  # Optional settings
+  # discordWebhook = "https://discord.com/api/webhooks/...";
+  # ntpServer = "time.cloudflare.com";
+  # httpPull = [ "10.0.0.5:505" ];
+  # luksDevice = "sda2";
+};
+
+# Configure LUKS as usual
+boot.initrd.luks.devices."cryptroot" = {
+  device = "/dev/disk/by-uuid/...";
+};
+```
+
+### Generate keys and tokens
 
 ```bash
-wpa_passphrase SSID SuperSecurePassword > /oem/wpa.conf
+nix run github:codecrafter404/kairos-re-unlock#re-unlock-cli -- new
 ```
 
-## Usage
-### Setup
-If you enable encryption you have to set up the following parts in the config file (in OEM, which is unencrypted at rest):
-```yaml
-kcrypt:
-   remote_unlock:
-      edgevpn_token: b3RwOgo<snip>==
-      # Public Key of the client
-      public_key: |
-         -----BEGIN PUBLIC KEY-----
-         MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAnQXyiHLnHgh7ctM6kmG4
-         <snip>
-         KepPymg6mdt8dn405JGI+lqmBiuq59Zp5W5sI7akeP9joMyi6+8OFvc8Zstrh7go
-         ZQIDAQAB
-         -----END PUBLIC KEY-----
-      # Private Key of Droplet
-      private_key: |
-         -----BEGIN PRIVATE KEY-----
-         MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDpKvh1oEA644EP
-         <snip>
-         gGpi0iY7JnClU1J0pJ6Uts4=
-         -----END PRIVATE KEY-----
-```
-This configuration can be generated using
-```bash
-kairos-re-unlock new
-```
-This command also outputs the corresponding public and private keys to be used for decryption.
-### Debug mode
-- to test the password receiving functionallity run `echo {} | /system/discovery/kcrypt-discovery-re-unlock discovery.password`
-- just running `/system/discovery/kcrypt-discovery-re-unlock` gives the config as output
+This outputs both the droplet configuration block and the client keys.
 
-### Usage of cli
-- for the usage of the cli, you can simply run the cli
+## WiFi in initrd
 
-### Notification
-In order to allow discord notifications add the `discord_webhook` parameter:
-```yaml
-kcrypt:
-   remote_unlock:
-      discord_webhook: https://discord.com/api/webhooks/<snap>
+To bring up WiFi before the LUKS unlock, enable the WiFi option and supply the required kernel modules and firmware for your hardware:
+
+```nix
+services.remote-unlock.wifi = {
+  enable = true;
+  interfaces = [ "wlan0" ];
+  kernelModules = [ "brcmfmac" "brcmutil" ];
+};
 ```
-### Debug
-The're some debug options. Debug mode has to be enabled before the other options may be used.
 
-> WARNING: Debug options should not be enabled in production as they leak the private and public key of the droplet on the `/logs` endpoint.
+You will also need to configure `wpa_supplicant` in the initrd.  See the NixOS manual section on `boot.initrd.network` for details.
+
+## Configuration file
+
+The droplet reads its YAML configuration from the first file it finds in the following directories (in order):
+
+1. `/etc/reunlock/`
+2. `/oem/`
+3. `/sysroot/oem/`
+4. `/tmp/oem/`
+
+When the NixOS module is enabled the config is generated automatically at `/etc/reunlock/config.yaml`.
+
+The expected YAML format:
 
 ```yaml
 kcrypt:
-   remote_unlock:
-      debug:
-         enabled: false
-         # Integer log level
-         log_level: -1
-         # Provides the password and therefore there is no need to enable encryption
-         password: supersecurepassword
-         # Bypasses the password validation which leads to broken systems, if a wrong password is provided
-         bypass_password_test: false
+  remote_unlock:
+    edgevpn_token: b3RwOg...==
+    public_key: |
+      -----BEGIN PUBLIC KEY-----
+      ...
+      -----END PUBLIC KEY-----
+    private_key: |
+      -----BEGIN PRIVATE KEY-----
+      ...
+      -----END PRIVATE KEY-----
+    # Optional
+    discord_webhook: https://discord.com/api/webhooks/...
+    http_pull:
+      - 10.0.0.5:505
+    ntp_server: time.cloudflare.com
+    debug:
+      enabled: false
+      log_level: -1
+      password: ""
+      bypass_password_test: false
+```
+
+## CLI usage
+
+| Command | Description |
+|---|---|
+| `re-unlock-cli new` | Generate keys, token & config |
+| `re-unlock-cli token` | Generate an EdgeVPN token |
+| `re-unlock-cli unlock` | Send password via P2P |
+| `re-unlock-cli unlock-http` | Send password via HTTP POST |
+| `re-unlock-cli unlock-serve` | Serve the password via HTTP GET |
+| `re-unlock-cli logs -i <ip>` | Fetch logs from the droplet (debug mode) |
+| `re-unlock-cli version` | Print version |
+
+## Droplet modes
+
+The droplet binary supports two modes:
+
+- `re-unlock-droplet discovery.password` – Kairos-compatible mode. Reads partition JSON from stdin, outputs a JSON `EventResponse` to stdout.
+- `re-unlock-droplet unlock [device]` – NixOS mode. Optionally validates the password against the given LUKS device and prints the raw password to stdout.
+
+Running the droplet without arguments prints the current configuration for debugging.
+
+## Notifications
+
+Add a Discord webhook for status notifications:
+
+```nix
+services.remote-unlock.discordWebhook = "https://discord.com/api/webhooks/...";
+```
+
+## Debug mode
+
+> **WARNING:** Debug options leak the private and public key on the `/logs` endpoint. Do not enable in production.
+
+```nix
+services.remote-unlock.debug = {
+  enable = true;
+  logLevel = -1;
+  password = "supersecurepassword";
+  bypassPasswordTest = false;
+};
 ```
 
 ## Naming
-- The decryption is handled by the `droplet` on the kairos-machine
-- the `client` sends the password
 
-## Building / Automation
-The build & upgrade process of the image is automated. (using github actions)
-### Building
-- the build process is automated for arm (raspberry pi) and x86 maschines
-- It utilizes the kairos factory action
-### Upgrade
-- The upgrade process pulls the current versions from the main karios repo and applies them to the github action
-- also the factory action is automatically updated
-- the current kubernetes version is directly from k3s github repo
-- **WARNING:** only this action will merge the Dockerfile_ext and base file for the new docker file. Before running build, after modifiying the dockerfile, you should run this action
+- **droplet** – the daemon running on the NixOS machine, waiting for the unlock password
+- **client** – the CLI tool used to send the password
+
+## Building
+
+### With Nix
+
+```bash
+nix build .#re-unlock-droplet
+nix build .#re-unlock-cli
+```
+
+### With Go
+
+```bash
+CGO_ENABLED=0 go build -o re-unlock-droplet ./droplet/main.go
+CGO_ENABLED=0 go build -o re-unlock-cli ./client/main.go
+```
+
+### CI / Automation
+
+The GitHub Actions workflow builds the CLI and droplet binaries for multiple platforms and creates a release. A `nix flake check` step verifies the Nix flake.
+

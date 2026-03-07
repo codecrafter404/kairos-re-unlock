@@ -8,22 +8,17 @@ on:
       - README.md
   workflow_dispatch:
 permissions:
-  id-token: write # OIDC support
+  id-token: write
   contents: write
   actions: read
   packages: write
   security-events: write
   models: none
-env:
-  BASE_IMAGE: "alpine:3.21"
-  KUBERNETES_VERSION: "v1.35.0+k3s3"
 jobs:
   setup-version:
     runs-on: ubuntu-24.04
     outputs:
       version: ${{ steps.tag.outputs.tag }}
-      kubernetes_version: ${{ steps.set-env.outputs.kubernetes_version }}
-      base_image: ${{ steps.set-env.outputs.base_image }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -33,11 +28,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG_PREFIX: v
         id: tag
-      - name: Set environment outputs
-        id: set-env
-        run: |
-          echo "kubernetes_version=${{ env.KUBERNETES_VERSION }}" >> "$GITHUB_OUTPUT"
-          echo "base_image=${{ env.BASE_IMAGE }}" >> "$GITHUB_OUTPUT"
   build-cli:
     runs-on: ubuntu-latest
     steps:
@@ -49,70 +39,49 @@ jobs:
       - name: Install dependencies
         run: mkdir build && go mod download
       - name: Build mac
-        run: GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build -v -o ./build/kairos-re-unlock_mac ./client/main.go
+        run: GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build -v -o ./build/re-unlock-cli_mac ./client/main.go
       - name: Build linux amd64
-        run: GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o ./build/kairos-re-unlock_linux-amd64 ./client/main.go
+        run: GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o ./build/re-unlock-cli_linux-amd64 ./client/main.go
       - name: Build linux arm64
-        run: GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -v -o ./build/kairos-re-unlock_linux-arm64 ./client/main.go
+        run: GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -v -o ./build/re-unlock-cli_linux-arm64 ./client/main.go
       - name: Build linux arm (32-Bit)
-        run: GOOS=linux GOARCH=arm CGO_ENABLED=0 go build -v -o ./build/kairos-re-unlock_linux-arm64 ./client/main.go
-      - name: ls
-        run: ls -la
+        run: GOOS=linux GOARCH=arm CGO_ENABLED=0 go build -v -o ./build/re-unlock-cli_linux-arm ./client/main.go
       - uses: actions/upload-artifact@v4
         with:
           path: ./build/
-          name: kairos-re-unlock.zip
-  build-amd64:
-    needs: setup-version
-    uses: kairos-io/kairos-factory-action/.github/workflows/reusable-factory.yaml@583ec0586948b7b8e7692f6db22e902b373d48f3
-    secrets:
-      registry_username: codecrafter404
-      registry_password: ${{ secrets.PACKAGE }}
-    with:
-      version: "auto"
-      base_image: ${{ needs.setup-version.outputs.base_image }}
-      model: "generic"
-      iso: true
-      summary_artifacts: true
-      arch: amd64
-      kubernetes_version: ${{ needs.setup-version.outputs.kubernetes_version }}
-      kubernetes_distro: k3s
-      dockerfile_path: Dockerfile
-      custom_artifact_format: "kairos-amd64"
-      # registry
-      registry_domain: ghcr.io
-      registry_namespace: codecrafter404
-      registry_repository: alpine-reunlock-$ARCH-$MODEL
-      custom_tag_format: $VERSION
-      image_labels: "org.opencontainers.image.source=https://github.com/codecrafter404/kairos-re-unlock"
-  build-rpi:
-    needs: setup-version
-    uses: kairos-io/kairos-factory-action/.github/workflows/reusable-factory.yaml@583ec0586948b7b8e7692f6db22e902b373d48f3
-    secrets:
-      registry_username: codecrafter404
-      registry_password: ${{ secrets.PACKAGE }}
-    with:
-      version: "auto"
-      base_image: ${{ needs.setup-version.outputs.base_image }}
-      model: "rpi4"
-      raw: true
-      summary_artifacts: true
-      arch: arm64
-      kubernetes_version: ${{ needs.setup-version.outputs.kubernetes_version }}
-      kubernetes_distro: k3s
-      dockerfile_path: Dockerfile
-      custom_artifact_format: "kairos-rpi"
-      # registry
-      registry_domain: ghcr.io
-      registry_namespace: codecrafter404
-      registry_repository: alpine-reunlock-$ARCH-$MODEL
-      custom_tag_format: $VERSION
-      image_labels: "org.opencontainers.image.source=https://github.com/codecrafter404/kairos-re-unlock"
+          name: re-unlock-cli.zip
+  build-droplet:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.5'
+      - name: Install dependencies
+        run: mkdir build && go mod download
+      - name: Build linux amd64
+        run: GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o ./build/re-unlock-droplet_linux-amd64 ./droplet/main.go
+      - name: Build linux arm64
+        run: GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -v -o ./build/re-unlock-droplet_linux-arm64 ./droplet/main.go
+      - uses: actions/upload-artifact@v4
+        with:
+          path: ./build/
+          name: re-unlock-droplet.zip
+  nix-check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v30
+        with:
+          nix_path: nixpkgs=channel:nixos-24.11
+      - name: Check flake
+        run: nix flake check --no-build
   release:
     runs-on: ubuntu-24.04
     permissions:
       contents: write
-    needs: ["build-amd64", "build-rpi", "setup-version", "build-cli"]
+    needs: ["build-cli", "build-droplet", "setup-version", "nix-check"]
     steps:
       - run: mkdir /tmp/artifacts
       - uses: actions/download-artifact@v5
@@ -128,9 +97,9 @@ jobs:
       - run: |
           arts=$(python3 -c 'import os
           res = []
-          for root, dirs, files in os.walk("/tmp/"):
+          for root, dirs, files in os.walk("/tmp/artifacts"):
               for name in files:
-                  if name.endswith(".raw") or name.endswith(".iso") or name.startswith("kairos-re-unlock"):
+                  if name.startswith("re-unlock-"):
                       res.append(os.path.join(root, name))
           print(str.join(",", res))')
           echo "artifacts=${arts}" >> ""$GITHUB_OUTPUT""
